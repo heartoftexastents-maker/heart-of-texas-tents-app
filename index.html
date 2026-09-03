@@ -25,28 +25,34 @@ input,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padd
 @media(max-width:430px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.item{grid-template-columns:1fr 58px 72px}.btns{grid-template-columns:1fr}}
 @media print{body{background:#fff}.app{max-width:800px}.btns,.hint,.settings,.manageRow,.add,#adminPanel{display:none!important}.card,.header{box-shadow:none}.header{border:1px solid #ddd}}
 
-/* Customer PDF / print sheet */
+/* Customer PDF / preview sheet */
 .pdfQuote{display:none}
+.pdfSheet{border:1px solid #d9e0e8;border-radius:10px;overflow:hidden;background:#fff}
+.pdfTop{height:8px;background:#17264d}
+.pdfHead{display:flex;align-items:center;padding:15px 17px 12px;border-bottom:1px solid #d9e0e8}
+.pdfLogo{width:82px;height:68px;object-fit:contain;margin-right:13px}
+.pdfBrand{flex:1;min-width:0}.pdfBrand h1{margin:0;font-family:Georgia,serif;font-size:19px;letter-spacing:1px;color:#17264d;line-height:1.1}
+.pdfBrand p{margin:4px 0 0;font-size:8pt;color:#66758c;font-weight:800;letter-spacing:.45px}
+.pdfContact{margin-left:12px;text-align:right;font-size:7.8pt;line-height:1.45;color:#44546c;white-space:nowrap}
+.pdfTitleBar{display:flex;justify-content:space-between;align-items:center;padding:10px 17px;background:#f4f6f8;border-bottom:1px solid #d9e0e8}
+.pdfTitleBar h2{margin:0;color:#b8202a;font-size:16px;letter-spacing:1.1px}.pdfMeta{text-align:right;font-size:8.2pt;line-height:1.5;color:#44546c}.pdfMeta b{color:#17264d}
+.pdfInfo{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:11px 17px 4px}.pdfBox{border:1px solid #d9e0e8;border-radius:6px;padding:7px 9px;min-height:30px}.pdfBoxWide{grid-column:1/-1}
+.pdfLabel{font-size:7pt;text-transform:uppercase;font-weight:900;color:#66758c;letter-spacing:.45px}.pdfValue{font-size:9.4pt;font-weight:700;color:#17264d;margin-top:2px;word-break:break-word}
+.pdfItemsWrap{padding:6px 17px 0}.pdfTable{width:100%;border-collapse:collapse}.pdfTable th{background:#17264d;color:#fff;text-align:left;padding:6px 7px;font-size:8pt;text-transform:uppercase;letter-spacing:.3px}.pdfTable th:nth-child(1),.pdfTable td:nth-child(1){width:9%;text-align:center}.pdfTable th:nth-child(3),.pdfTable td:nth-child(3),.pdfTable th:nth-child(4),.pdfTable td:nth-child(4){text-align:right}.pdfTable td{padding:6px 7px;border-bottom:1px solid #e3e7ec;font-size:9pt}.pdfTable tbody tr:last-child td{border-bottom:1px solid #cbd5e1}
+.pdfTotalsArea{display:flex;justify-content:flex-end;padding:8px 17px 0}.pdfTotals{width:44%;min-width:230px}.pdfTotalRow{display:flex;justify-content:space-between;gap:15px;padding:3px 0;font-size:9pt}.pdfGrand{border-top:2px solid #b8202a;margin-top:4px;padding:7px 0 5px;font-size:13.5pt;font-weight:900}.pdfBalance{font-weight:900;color:#b8202a;border-top:1px solid #d9e0e8;margin-top:2px;padding-top:5px}
+.pdfNotes{margin:9px 17px 0;border:1px solid #d9e0e8;border-left:4px solid #b8202a;border-radius:6px;padding:7px 9px}.pdfFooter{margin-top:12px;padding:9px 17px 12px;background:#17264d;color:#fff;text-align:center;font-size:7.8pt;line-height:1.45}.pdfFooter b{color:#fff}
+.pdfPreviewOverlay{position:fixed;inset:0;z-index:9999;background:rgba(10,18,38,.78);padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom);display:none;overflow:auto}
+.pdfPreviewOverlay.show{display:block}.pdfPreviewCard{max-width:760px;margin:12px auto;background:#eef1f5;border-radius:16px;padding:10px;min-height:calc(100vh - 24px)}
+.pdfPreviewBar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 2px 10px;color:#17264d}.pdfPreviewBar b{font-size:16px}.pdfPreviewBar button{border:0;border-radius:9px;padding:9px 12px;font-weight:850;background:#fff;color:#17264d}
+.pdfPreviewPage{background:#fff;padding:8px;overflow:auto;border-radius:8px;box-shadow:0 3px 16px #0002}.pdfPreviewPage .pdfSheet{max-width:7.8in;margin:0 auto}.pdfPreviewActions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.pdfPreviewActions button{border:0;border-radius:11px;padding:13px 9px;font-weight:850;font-size:14px}.pdfCancel{background:#fff;color:#17264d}.pdfPrint{background:#b8202a;color:#fff}
+@media(max-width:430px){.pdfPreviewCard{margin:0 auto;min-height:100vh;border-radius:0;padding:8px}.pdfPreviewBar b{font-size:14px}.pdfPreviewPage{padding:4px}.pdfPreviewPage .pdfHead{padding:11px 10px 9px}.pdfPreviewPage .pdfLogo{width:62px;height:52px;margin-right:8px}.pdfPreviewPage .pdfBrand h1{font-size:14px}.pdfPreviewPage .pdfBrand p{font-size:6.5pt}.pdfPreviewPage .pdfContact{font-size:6pt;margin-left:6px}.pdfPreviewPage .pdfTitleBar{padding:8px 10px}.pdfPreviewPage .pdfTitleBar h2{font-size:12px}.pdfPreviewPage .pdfMeta{font-size:6.5pt}.pdfPreviewPage .pdfInfo{padding:8px 10px 3px;gap:5px}.pdfPreviewPage .pdfItemsWrap{padding:5px 10px 0}.pdfPreviewPage .pdfTable th,.pdfPreviewPage .pdfTable td{padding:5px 4px;font-size:7pt}.pdfPreviewPage .pdfTotalsArea{padding:6px 10px 0}.pdfPreviewPage .pdfTotals{min-width:0;width:52%}.pdfPreviewPage .pdfTotalRow{font-size:7pt}.pdfPreviewPage .pdfGrand{font-size:10pt}.pdfPreviewPage .pdfNotes{margin:7px 10px 0}.pdfPreviewPage .pdfFooter{margin-top:8px;padding:7px 10px 9px;font-size:6.5pt}}
 @media print{
  @page{size:Letter;margin:.35in}
  html,body{background:#fff!important}
  body.printing .app{display:block!important;max-width:none!important;padding:0!important;margin:0!important;background:#fff!important}
- body.printing .app > *:not(#pdfQuote){display:none!important}
- body.printing #pdfQuote{display:block!important;width:100%!important;max-width:7.8in!important;margin:0 auto!important;font-family:Arial,Helvetica,sans-serif;color:#17264d;font-size:10pt;line-height:1.3;background:#fff!important}
- .pdfSheet{border:1px solid #d9e0e8;border-radius:10px;overflow:hidden;background:#fff}
- .pdfTop{height:8px;background:#17264d}
- .pdfHead{display:flex;align-items:center;padding:15px 17px 12px;border-bottom:1px solid #d9e0e8}
- .pdfLogo{width:82px;height:68px;object-fit:contain;margin-right:13px}
- .pdfBrand{flex:1;min-width:0}.pdfBrand h1{margin:0;font-family:Georgia,serif;font-size:19px;letter-spacing:1px;color:#17264d;line-height:1.1}
- .pdfBrand p{margin:4px 0 0;font-size:8pt;color:#66758c;font-weight:800;letter-spacing:.45px}
- .pdfContact{margin-left:12px;text-align:right;font-size:7.8pt;line-height:1.45;color:#44546c;white-space:nowrap}
- .pdfTitleBar{display:flex;justify-content:space-between;align-items:center;padding:10px 17px;background:#f4f6f8;border-bottom:1px solid #d9e0e8}
- .pdfTitleBar h2{margin:0;color:#b8202a;font-size:16px;letter-spacing:1.1px}.pdfMeta{text-align:right;font-size:8.2pt;line-height:1.5;color:#44546c}.pdfMeta b{color:#17264d}
- .pdfInfo{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:11px 17px 4px}.pdfBox{border:1px solid #d9e0e8;border-radius:6px;padding:7px 9px;min-height:30px}.pdfBoxWide{grid-column:1/-1}
- .pdfLabel{font-size:7pt;text-transform:uppercase;font-weight:900;color:#66758c;letter-spacing:.45px}.pdfValue{font-size:9.4pt;font-weight:700;color:#17264d;margin-top:2px;word-break:break-word}
- .pdfItemsWrap{padding:6px 17px 0}.pdfTable{width:100%;border-collapse:collapse}.pdfTable th{background:#17264d;color:#fff;text-align:left;padding:6px 7px;font-size:8pt;text-transform:uppercase;letter-spacing:.3px}.pdfTable th:nth-child(1),.pdfTable td:nth-child(1){width:9%;text-align:center}.pdfTable th:nth-child(3),.pdfTable td:nth-child(3),.pdfTable th:nth-child(4),.pdfTable td:nth-child(4){text-align:right}.pdfTable td{padding:6px 7px;border-bottom:1px solid #e3e7ec;font-size:9pt}.pdfTable tbody tr:last-child td{border-bottom:1px solid #cbd5e1}
- .pdfTotalsArea{display:flex;justify-content:flex-end;padding:8px 17px 0}.pdfTotals{width:44%;min-width:230px}.pdfTotalRow{display:flex;justify-content:space-between;gap:15px;padding:3px 0;font-size:9pt}.pdfGrand{border-top:2px solid #b8202a;margin-top:4px;padding:7px 0 5px;font-size:13.5pt;font-weight:900}.pdfBalance{font-weight:900;color:#b8202a;border-top:1px solid #d9e0e8;margin-top:2px;padding-top:5px}
- .pdfNotes{margin:9px 17px 0;border:1px solid #d9e0e8;border-left:4px solid #b8202a;border-radius:6px;padding:7px 9px}.pdfFooter{margin-top:12px;padding:9px 17px 12px;background:#17264d;color:#fff;text-align:center;font-size:7.8pt;line-height:1.45}.pdfFooter b{color:#fff}
+ body.printing .app > *{display:none!important}
+ body.printing #pdfQuote{display:block!important;position:static!important;width:100%!important;max-width:7.8in!important;margin:0 auto!important;font-family:Arial,Helvetica,sans-serif;color:#17264d;font-size:10pt;line-height:1.3;background:#fff!important}
+ body.printing .pdfPreviewOverlay{display:none!important}
 }
 </style>
 </head>
@@ -158,10 +164,11 @@ input,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padd
 <div class="card"><div class="title">Message Preview</div><div id="preview" class="preview"></div>
 <div class="hint">Heart of Texas Tents • Waco, TX • heartoftexastents@gmail.com</div></div>
 
-<div id="pdfQuote" class="pdfQuote" aria-hidden="true"></div>
-
 <div class="card settings"><b>Inventario:</b> los nombres y precios se pueden configurar en una futura sección de administración. No ads, subscriptions, or paid services are built into this app.</div>
 </div>
+
+<div id="pdfQuote" class="pdfQuote" aria-hidden="true"></div>
+<div id="pdfPreviewOverlay" class="pdfPreviewOverlay" aria-hidden="true"><div class="pdfPreviewCard"><div class="pdfPreviewBar"><b>📄 Review Professional PDF</b><button type="button" onclick="closePdfPreview()">✕ CLOSE</button></div><div id="pdfPreviewPage" class="pdfPreviewPage"></div><div class="pdfPreviewActions"><button type="button" class="pdfCancel" onclick="closePdfPreview()">← BACK</button><button type="button" class="pdfPrint" onclick="printPreparedPdf()">🖨️ CREATE PDF</button></div></div></div>
 
 <script>
 const DEFAULT_PRODUCTS=[
@@ -352,7 +359,7 @@ function printQuote(){
   if(phone||email) info.push(`<div class="pdfBox pdfBoxWide"><div class="pdfLabel">Customer Contact</div><div class="pdfValue">${escPdf([phone,email].filter(Boolean).join(" • "))}</div></div>`);
   const delivery=Number(document.getElementById("delivery").value)||0, discount=Number(document.getElementById("discount").value)||0, rate=Number(document.getElementById("taxRate").value)||0, deposit=Number(document.getElementById("deposit").value)||0;
   const optionalTotals=`${delivery?`<div class="pdfTotalRow"><span>Delivery / Setup</span><b>${document.getElementById("deliveryOut").textContent}</b></div>`:""}${discount?`<div class="pdfTotalRow"><span>Discount</span><b>${document.getElementById("discountOut").textContent}</b></div>`:""}${rate?`<div class="pdfTotalRow"><span>Tax</span><b>${document.getElementById("taxOut").textContent}</b></div>`:""}`;
-  document.getElementById("pdfQuote").innerHTML=`
+  const pdfHtml=`
    <div class="pdfSheet"><div class="pdfTop"></div>
     <div class="pdfHead"><img class="pdfLogo" src="${logo}" alt="Heart of Texas Tents"><div class="pdfBrand"><h1>HEART OF TEXAS TENTS</h1><p>EVENT RENTALS • WACO, TEXAS & SURROUNDING AREAS</p></div><div class="pdfContact"><b>Calls:</b> (254) 900-7588<br><b>Text / WhatsApp:</b> (254) 495-5082<br><b>Email:</b> heartoftexastents@gmail.com</div></div>
     <div class="pdfTitleBar"><h2>RENTAL QUOTE</h2><div class="pdfMeta"><b>Quote #:</b> ${escPdf(quoteNo)}<br><b>Created:</b> ${escPdf(dateText("created"))}</div></div>
@@ -361,8 +368,16 @@ function printQuote(){
     <div class="pdfTotalsArea"><div class="pdfTotals"><div class="pdfTotalRow"><span>Rental Items</span><b>${document.getElementById("rentals").textContent}</b></div>${optionalTotals}<div class="pdfTotalRow pdfGrand"><span>TOTAL</span><span>${document.getElementById("total").textContent}</span></div>${deposit?`<div class="pdfTotalRow"><span>Deposit</span><b>${document.getElementById("depositOut").textContent}</b></div><div class="pdfTotalRow pdfBalance"><span>BALANCE DUE</span><span>${document.getElementById("balance").textContent}</span></div>`:""}</div></div>
     ${notes?`<div class="pdfNotes"><div class="pdfLabel">Notes</div><div class="pdfValue">${escPdf(notes)}</div></div>`:""}
     <div class="pdfFooter">Thank you for choosing <b>Heart of Texas Tents</b> • Waco, TX & surrounding areas<br>(254) 900-7588 • Text/WhatsApp (254) 495-5082 • heartoftexastents@gmail.com</div></div>`;
-  const startPrint=()=>window.print();
-  setTimeout(startPrint,500);
+  document.getElementById("pdfQuote").innerHTML=pdfHtml;
+  document.getElementById("pdfPreviewPage").innerHTML=pdfHtml;
+  const overlay=document.getElementById("pdfPreviewOverlay");overlay.classList.add("show");overlay.setAttribute("aria-hidden","false");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function closePdfPreview(){const overlay=document.getElementById("pdfPreviewOverlay");overlay.classList.remove("show");overlay.setAttribute("aria-hidden","true");}
+function printPreparedPdf(){
+  closePdfPreview();
+  document.body.classList.add("printing");
+  setTimeout(()=>window.print(),600);
   window.onafterprint=function(){document.body.classList.remove("printing");window.onafterprint=null;};
 }
 function newQuote(){if(!confirm("Start a new quote? Your saved quotes and inventory will stay safe."))return;if(hasQuoteContent())saveCurrentQuote("DRAFT");resetQuoteForm();window.scrollTo({top:0,behavior:"smooth"})}
