@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="htt-pdf-version" content="2026-10-08-company-info-v2">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -50,7 +51,8 @@ input,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padd
  .pdfLabel{font-size:7pt;text-transform:uppercase;font-weight:900;color:#66758c;letter-spacing:.45px}.pdfValue{font-size:9.4pt;font-weight:700;color:#17264d;margin-top:2px;word-break:break-word}
  .pdfItemsWrap{padding:6px 17px 0}.pdfTable{width:100%;border-collapse:collapse}.pdfTable th{background:#17264d;color:#fff;text-align:left;padding:6px 7px;font-size:8pt;text-transform:uppercase;letter-spacing:.3px}.pdfTable th:nth-child(1),.pdfTable td:nth-child(1){width:9%;text-align:center}.pdfTable th:nth-child(3),.pdfTable td:nth-child(3),.pdfTable th:nth-child(4),.pdfTable td:nth-child(4){text-align:right}.pdfTable td{padding:6px 7px;border-bottom:1px solid #e3e7ec;font-size:9pt}.pdfTable tbody tr:last-child td{border-bottom:1px solid #cbd5e1}
  .pdfTotalsArea{display:flex;justify-content:flex-end;padding:8px 17px 0}.pdfTotals{width:44%;min-width:230px}.pdfTotalRow{display:flex;justify-content:space-between;gap:15px;padding:3px 0;font-size:9pt}.pdfGrand{border-top:2px solid #b8202a;margin-top:4px;padding:7px 0 5px;font-size:13.5pt;font-weight:900}.pdfBalance{font-weight:900;color:#b8202a;border-top:1px solid #d9e0e8;margin-top:2px;padding-top:5px}
- .pdfNotes{margin:9px 17px 0;border:1px solid #d9e0e8;border-left:4px solid #b8202a;border-radius:6px;padding:7px 9px}.pdfFooter{margin-top:12px;padding:9px 17px 12px;background:#17264d;color:#fff;text-align:center;font-size:7.8pt;line-height:1.45}.pdfFooter b{color:#fff}
+ .pdfNotes{margin:9px 17px 0;border:1px solid #d9e0e8;border-left:4px solid #b8202a;border-radius:6px;padding:7px 9px}.pdfWebsiteBar{padding:7px 17px;text-align:center;background:#17264d;color:#fff;font-size:8.5pt;font-weight:800;letter-spacing:.35px}.pdfWebsiteBar span{color:#b8202a}
+.pdfFooter{margin-top:12px;padding:9px 17px 12px;background:#17264d;color:#fff;text-align:center;font-size:7.8pt;line-height:1.45}.pdfFooter b{color:#fff}
 }
 </style>
 </head>
@@ -375,13 +377,13 @@ function printQuote(mode="quote"){
   const optionalTotals=`${delivery?`<div class="pdfTotalRow"><span>Delivery / Setup</span><b>${document.getElementById("deliveryOut").textContent}</b></div>`:""}${discount?`<div class="pdfTotalRow"><span>Discount</span><b>${document.getElementById("discountOut").textContent}</b></div>`:""}${rate?`<div class="pdfTotalRow"><span>Tax</span><b>${document.getElementById("taxOut").textContent}</b></div>`:""}`;
   document.getElementById("pdfQuote").innerHTML=`
    <div class="pdfSheet"><div class="pdfTop"></div>
-    <div class="pdfHead"><img class="pdfLogo" src="${logo}" alt="Heart of Texas Tents"><div class="pdfBrand"><h1>HEART OF TEXAS TENTS</h1><p>EVENT RENTALS • WACO, TEXAS & SURROUNDING AREAS</p><p style="margin-top:3px;font-size:7.5pt;color:#b8202a;font-weight:800">HIGH PEAK TENTS • EVENT LIGHTING • TABLES • CHAIRS • SIDE WALLS</p></div><div class="pdfContact"><b>Calls:</b> (254) 900-7588<br><b>Text / WhatsApp:</b> (254) 495-5082<br><b>Email:</b> heartoftexastents@gmail.com<br><b>Web:</b> heartoftexastents.com<br><b>Se habla español</b></div></div>
+    <div class="pdfHead"><img class="pdfLogo" src="${logo}" alt="Heart of Texas Tents"><div class="pdfBrand"><h1>HEART OF TEXAS TENTS</h1><p>EVENT RENTALS • WACO, TEXAS & SURROUNDING AREAS</p><p style="margin-top:3px;font-size:7.5pt;color:#b8202a;font-weight:800">HIGH PEAK TENTS • EVENT LIGHTING • TABLES • CHAIRS • SIDE WALLS</p></div><div class="pdfContact"><b>Calls:</b> (254) 900-7588<br><b>Text / WhatsApp:</b> (254) 495-5082<br><b>Email:</b> heartoftexastents@gmail.com<br><b>Web:</b> www.heartoftexastents.com<br><b>Se habla español</b></div></div><div class="pdfWebsiteBar">VISIT OUR WEBSITE: <strong>www.heartoftexastents.com</strong> &nbsp;•&nbsp; SE HABLA ESPAÑOL</div>
     <div class="pdfTitleBar"><h2>${mode==="invoice"?"PAID RENTAL INVOICE":"RENTAL QUOTE"}</h2><div class="pdfMeta"><b>${mode==="invoice"?"Invoice #":"Quote #"}:</b> ${escPdf(quoteNo)}<br><b>Created:</b> ${escPdf(dateText("created"))}${mode==="invoice"?`<br><b>Paid:</b> ${escPdf(window.currentPaidDate||today())}`:""}</div></div>
     ${info.length?`<div class="pdfInfo">${info.join("")}</div>`:""}
     <div class="pdfItemsWrap"><table class="pdfTable"><thead><tr><th>Qty</th><th>Rental Item</th><th>Unit Price</th><th>Amount</th></tr></thead><tbody>${rows}</tbody></table></div>
     <div class="pdfTotalsArea"><div class="pdfTotals"><div class="pdfTotalRow"><span>Rental Items</span><b>${document.getElementById("rentals").textContent}</b></div>${optionalTotals}<div class="pdfTotalRow pdfGrand"><span>TOTAL</span><span>${document.getElementById("total").textContent}</span></div>${deposit?`<div class="pdfTotalRow"><span>Deposit</span><b>${document.getElementById("depositOut").textContent}</b></div>`:""}${mode==="invoice"?`<div class="pdfTotalRow"><span>Amount Paid</span><b>${document.getElementById("total").textContent}</b></div><div class="pdfTotalRow pdfBalance"><span>BALANCE PAID</span><span>$0.00</span></div><div class="pdfTotalRow"><span>Payment Method</span><b>${escPdf(window.currentPaymentMethod||"Square")}</b></div>`:deposit?`<div class="pdfTotalRow pdfBalance"><span>BALANCE DUE</span><span>${document.getElementById("balance").textContent}</span></div>`:""}</div></div>
     ${notes?`<div class="pdfNotes"><div class="pdfLabel">Notes</div><div class="pdfValue">${escPdf(notes)}</div></div>`:""}
-    <div class="pdfFooter">Thank you for choosing <b>Heart of Texas Tents</b> • Waco, TX & surrounding areas<br>High Peak Tents • Event Lighting • Tables • Chairs • Side Walls<br>(254) 900-7588 • Text/WhatsApp (254) 495-5082 • heartoftexastents@gmail.com • heartoftexastents.com • Se habla español</div></div>`;
+    <div class="pdfFooter">Thank you for choosing <b>Heart of Texas Tents</b> • Waco, TX & surrounding areas<br>High Peak Tents • Event Lighting • Tables • Chairs • Side Walls<br>Calls: (254) 900-7588 • Text/WhatsApp: (254) 495-5082 • heartoftexastents@gmail.com<br><b style="font-size:9pt">WEBSITE: www.heartoftexastents.com • SE HABLA ESPAÑOL</b></div></div>`;
   const startPrint=()=>window.print();
   setTimeout(startPrint,500);
   window.onafterprint=function(){document.body.classList.remove("printing");window.onafterprint=null;};
