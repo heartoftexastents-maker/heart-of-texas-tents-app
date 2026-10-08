@@ -349,13 +349,49 @@ function printSavedQuote(id){const q=getQuotes().find(x=>x.id===id);if(!q)return
 function printSavedInvoice(id){const q=getQuotes().find(x=>x.id===id);if(!q)return;window.currentPaymentMethod=q.paymentMethod||"Square";window.currentPaidDate=q.paidDate||today();loadQuote(id);setTimeout(()=>printQuote("invoice"),50)}
 function bytesFromBase64(dataUrl){const b64=dataUrl.split(",")[1]||"";const bin=atob(b64);const out=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);return out}
 function buildPdfFromJpeg(jpeg,w,h){const enc=new TextEncoder();const parts=[];const offsets=[];let pos=0;const push=s=>{const b=typeof s==="string"?enc.encode(s):s;parts.push(b);pos+=b.length};const obj=(n,body)=>{offsets[n]=pos;push(`${n} 0 obj\n${body}\nendobj\n`)};push("%PDF-1.3\n%\xFF\xFF\xFF\xFF\n");obj(1,"<< /Type /Catalog /Pages 2 0 R >>");obj(2,"<< /Type /Pages /Kids [3 0 R] /Count 1 >>");obj(3,"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>");offsets[4]=pos;push(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${w} /Height ${h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`);push(jpeg);push("\nendstream\nendobj\n");const stream=`q\n612 0 0 792 0 0 cm\n/Im0 Do\nQ\n`;obj(5,`<< /Length ${enc.encode(stream).length} >>\nstream\n${stream}endstream`);const xref=pos;push("xref\n0 6\n0000000000 65535 f \n");for(let i=1;i<=5;i++)push(String(offsets[i]).padStart(10,"0")+" 00000 n \n");push(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);const total=parts.reduce((n,b)=>n+b.length,0),all=new Uint8Array(total);let off=0;for(const b of parts){all.set(b,off);off+=b.length}return all}
-function sharePdfFile(){
-  // Use the exact same professional one-page PDF layout as Professional PDF.
-  // iPhone can then share/save the generated PDF from the native print preview.
-  printQuote("quote");
+async function sharePdfFile(){
+  // Create the SAME professional one-page PDF, then share the actual PDF file
+  // through the iPhone share sheet. Professional PDF keeps using print preview.
+  try{
+    printQuote("quote",false);
+    await new Promise(r=>setTimeout(r,80));
+    const sheet=document.querySelector("#pdfQuote .pdfSheet");
+    if(!sheet)throw new Error("PDF sheet not ready");
+    const css=[...document.querySelectorAll("style")].map(x=>x.textContent).join("\n");
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" width="816" height="1056" viewBox="0 0 816 1056"><style><![CDATA[${css}\n.pdfQuote{display:block!important;width:100%!important;max-width:7.8in!important;margin:0 auto!important;font-family:Arial,Helvetica,sans-serif;color:#17264d;font-size:10pt;line-height:1.3;background:#fff!important}.app{display:block!important;background:#fff!important}.pdfSheet{width:100%;box-sizing:border-box}</style><foreignObject x="0" y="0" width="816" height="1056"><div xmlns="http://www.w3.org/1999/xhtml" style="width:816px;height:1056px;background:#fff">${sheet.outerHTML}</div></foreignObject></svg>`;
+    const svgBlob=new Blob([svg],{type:"image/svg+xml;charset=utf-8"});
+    const svgUrl=URL.createObjectURL(svgBlob);
+    const img=new Image();
+    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=svgUrl});
+    const scale=2,canvas=document.createElement("canvas");
+    canvas.width=816*scale;canvas.height=1056*scale;
+    const ctx=canvas.getContext("2d");
+    ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    URL.revokeObjectURL(svgUrl);
+    const jpeg=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.94));
+    if(!jpeg)throw new Error("Could not create PDF image");
+    const jpegBytes=new Uint8Array(await jpeg.arrayBuffer());
+    const pdfBytes=buildPdfFromJpeg(jpegBytes,canvas.width,canvas.height);
+    const fileName="Heart-of-Texas-Tents-Quote-"+(document.getElementById("quoteNo").value||"Quote")+".pdf";
+    const file=new File([pdfBytes],fileName,{type:"application/pdf"});
+    document.body.classList.remove("printing");
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+      await navigator.share({title:"Heart of Texas Tents Quote",text:"Rental Quote - Heart of Texas Tents",files:[file]});
+    }else{
+      const url=URL.createObjectURL(file);
+      const a=document.createElement("a");a.href=url;a.download=file.name;a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),2000);
+      alert("Your PDF is ready. If the Share menu did not open, the PDF was downloaded instead.");
+    }
+  }catch(e){
+    document.body.classList.remove("printing");
+    console.error(e);
+    alert("Unable to create the shareable PDF. Please use Professional PDF.");
+  }
 }
 function escPdf(s){return escapeHtml(String(s||""))}
-function printQuote(mode="quote"){
+function printQuote(mode="quote",doPrint=true){
   document.body.classList.add("printing");
   const logo=document.querySelector(".logo")?.src||"";
   const customer=document.getElementById("customer").value.trim();
@@ -384,9 +420,11 @@ function printQuote(mode="quote"){
     <div class="pdfTotalsArea"><div class="pdfTotals"><div class="pdfTotalRow"><span>Rental Items</span><b>${document.getElementById("rentals").textContent}</b></div>${optionalTotals}<div class="pdfTotalRow pdfGrand"><span>TOTAL</span><span>${document.getElementById("total").textContent}</span></div>${deposit?`<div class="pdfTotalRow"><span>Deposit</span><b>${document.getElementById("depositOut").textContent}</b></div>`:""}${mode==="invoice"?`<div class="pdfTotalRow"><span>Amount Paid</span><b>${document.getElementById("total").textContent}</b></div><div class="pdfTotalRow pdfBalance"><span>BALANCE PAID</span><span>$0.00</span></div><div class="pdfTotalRow"><span>Payment Method</span><b>${escPdf(window.currentPaymentMethod||"Square")}</b></div>`:deposit?`<div class="pdfTotalRow pdfBalance"><span>BALANCE DUE</span><span>${document.getElementById("balance").textContent}</span></div>`:""}</div></div>
     ${notes?`<div class="pdfNotes"><div class="pdfLabel">Notes</div><div class="pdfValue">${escPdf(notes)}</div></div>`:""}
     <div class="pdfFooter">Thank you for choosing <b>Heart of Texas Tents</b> • Waco, TX & surrounding areas<br>High Peak Tents • Event Lighting • Tables • Chairs • Side Walls<br>Calls: (254) 900-7588 • Text/WhatsApp: (254) 495-5082 • heartoftexastents@gmail.com<br><b style="font-size:9pt">WEBSITE: www.heartoftexastents.com • SE HABLA ESPAÑOL</b></div></div>`;
-  const startPrint=()=>window.print();
-  setTimeout(startPrint,500);
-  window.onafterprint=function(){document.body.classList.remove("printing");window.onafterprint=null;};
+  if(doPrint){
+    const startPrint=()=>window.print();
+    setTimeout(startPrint,500);
+    window.onafterprint=function(){document.body.classList.remove("printing");window.onafterprint=null;};
+  }
 }
 function newQuote(){if(!confirm("Start a new quote? Your saved quotes and inventory will stay safe."))return;if(hasQuoteContent()){if(confirm("Save this quote as a DRAFT before starting a new one?"))saveCurrentQuote("DRAFT")}resetQuoteForm();window.scrollTo({top:0,behavior:"smooth"})}
 ["delivery","discount","taxRate","deposit","customer","phone","email","installDate","address","notes"].forEach(id=>document.getElementById(id).addEventListener("input",calc));
