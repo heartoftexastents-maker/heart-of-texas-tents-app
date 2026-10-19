@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="htt-pdf-version" content="2026-10-08-company-info-v2">
+<meta name="htt-pdf-version" content="2026-10-19-image-button-no-tax">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -141,7 +141,7 @@ input,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padd
 <div class="card"><div class="title">Charges & Payment</div><div class="grid">
 <div><label>Delivery / Setup</label><input id="delivery" type="number" min="0" step=".01" value="" placeholder="0"></div>
 <div><label>Discount</label><input id="discount" type="number" min="0" step=".01" value="" placeholder="0"></div>
-<div><label>Tax Rate %</label><input id="taxRate" type="number" min="0" step=".01" value="8.25"></div>
+
 <div><label>Deposit / Retainer</label><input id="deposit" type="number" min="0" step=".01" value="" placeholder="0"></div>
 <div class="full"><label>Notes</label><textarea id="notes">Thank you for choosing Heart of Texas Tents!</textarea></div>
 </div></div>
@@ -150,18 +150,16 @@ input,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padd
 <div class="row"><span>Rental Items</span><span id="rentals">$0.00</span></div>
 <div class="row"><span>Delivery / Setup</span><span id="deliveryOut">$0.00</span></div>
 <div class="row"><span>Discount</span><span id="discountOut">-$0.00</span></div>
-<div class="row"><span>Tax</span><span id="taxOut">$0.00</span></div>
+
 <div class="row grand"><span>TOTAL</span><span id="total">$0.00</span></div>
 <div class="row"><span>Deposit</span><span id="depositOut">$0.00</span></div>
 <div class="row balance"><span>Balance Due</span><span id="balance">$0.00</span></div>
 </div>
 <div class="btns actionBtns">
 <button class="btn navy" onclick="saveDraft()">💾 Save Draft</button>
-<button class="btn green" onclick="sendWhatsApp()">🟢 WhatsApp</button>
-<button class="btn navy" onclick="sendSMS()">💬 Text</button>
 <button class="btn light" onclick="sendEmail()">📧 Email</button>
 <button class="btn light" onclick="printQuote()">📄 Professional PDF</button>
-<button class="btn light" onclick="sharePdfFile()">📤 Share PDF</button>
+<button class="btn light" onclick="saveQuoteImage()">🖼️ Save Quote as Image</button>
 </div></div>
 
 <div class="card"><div class="title">Message Preview</div><div id="preview" class="preview"></div>
@@ -268,10 +266,10 @@ function calc(){
  let rentals=0;
  products.forEach((p,i)=>{const q=Number(document.getElementById("q"+i)?.value)||0;const line=q*Number(p.price||0);rentals+=line;const o=document.getElementById("l"+i);if(o)o.textContent=money(line)});
  const delivery=Number(document.getElementById("delivery").value)||0,discount=Number(document.getElementById("discount").value)||0;
- const rate=(Number(document.getElementById("taxRate").value)||0)/100,taxable=Math.max(0,rentals+delivery-discount),tax=taxable*rate,total=taxable+tax;
+ const total=Math.max(0,rentals+delivery-discount);
  const dep=Math.min(total,Number(document.getElementById("deposit").value)||0),bal=total-dep;
  document.getElementById("rentals").textContent=money(rentals);document.getElementById("deliveryOut").textContent=money(delivery);
- document.getElementById("discountOut").textContent="-"+money(discount);document.getElementById("taxOut").textContent=money(tax);
+ document.getElementById("discountOut").textContent="-"+money(discount);
  document.getElementById("total").textContent=money(total);document.getElementById("depositOut").textContent=money(dep);document.getElementById("balance").textContent=money(bal);
  document.getElementById("preview").textContent=buildQuote();
 }
@@ -294,10 +292,10 @@ function buildQuote(){
   if(address) parts.push(`Location: ${address}`);
   parts.push(`\n${lines.length?lines.join("\n"):"No rental items selected."}`);
   parts.push(`\nRental Items: ${document.getElementById("rentals").textContent}`);
-  const delivery=Number(document.getElementById("delivery").value)||0, discount=Number(document.getElementById("discount").value)||0, rate=Number(document.getElementById("taxRate").value)||0, deposit=Number(document.getElementById("deposit").value)||0;
+  const delivery=Number(document.getElementById("delivery").value)||0, discount=Number(document.getElementById("discount").value)||0, deposit=Number(document.getElementById("deposit").value)||0;
   if(delivery) parts.push(`Delivery / Setup: ${document.getElementById("deliveryOut").textContent}`);
   if(discount) parts.push(`Discount: ${document.getElementById("discountOut").textContent}`);
-  if(rate) parts.push(`Tax: ${document.getElementById("taxOut").textContent}`);
+
   parts.push(`TOTAL: ${document.getElementById("total").textContent}`);
   if(deposit) parts.push(`Deposit: ${document.getElementById("depositOut").textContent}\nBALANCE DUE: ${document.getElementById("balance").textContent}`);
   const notes=document.getElementById("notes").value.trim(); if(notes) parts.push(`\n${notes}`);
@@ -307,19 +305,19 @@ function buildQuote(){
 
 function quoteData(){
  const items=[]; products.forEach((p,i)=>{const q=Number(document.getElementById("q"+i)?.value)||0;if(q>0)items.push({name:p.name,qty:q,price:Number(p.price)||0,amount:q*(Number(p.price)||0)});});
- return {id:document.getElementById("quoteNo").value,created:document.getElementById("created").value,customer:document.getElementById("customer").value.trim(),phone:document.getElementById("phone").value.trim(),email:document.getElementById("email").value.trim(),installDate:document.getElementById("installDate").value,address:document.getElementById("address").value.trim(),items,delivery:Number(document.getElementById("delivery").value)||0,discount:Number(document.getElementById("discount").value)||0,taxRate:Number(document.getElementById("taxRate").value)||8.25,deposit:Number(document.getElementById("deposit").value)||0,total:document.getElementById("total").textContent,balance:document.getElementById("balance").textContent,notes:document.getElementById("notes").value.trim(),status:"QUOTE SENT",updated:new Date().toISOString()};
+ return {id:document.getElementById("quoteNo").value,created:document.getElementById("created").value,customer:document.getElementById("customer").value.trim(),phone:document.getElementById("phone").value.trim(),email:document.getElementById("email").value.trim(),installDate:document.getElementById("installDate").value,address:document.getElementById("address").value.trim(),items,delivery:Number(document.getElementById("delivery").value)||0,discount:Number(document.getElementById("discount").value)||0,deposit:Number(document.getElementById("deposit").value)||0,total:document.getElementById("total").textContent,balance:document.getElementById("balance").textContent,notes:document.getElementById("notes").value.trim(),status:"QUOTE SENT",updated:new Date().toISOString()};
 }
 function getQuotes(){try{return JSON.parse(localStorage.getItem("httQuotes")||"[]")}catch(e){return[]}}
 function saveQuotes(qs){localStorage.setItem("httQuotes",JSON.stringify(qs));}
 function saveCurrentQuote(status){const q=quoteData();const qs=getQuotes();const i=qs.findIndex(x=>x.id===q.id);if(i>=0){q.status=(status==="DRAFT"&&qs[i].status)?qs[i].status:(status||qs[i].status||"QUOTE SENT");qs[i]=q}else{q.status=status||"QUOTE SENT";qs.unshift(q)}saveQuotes(qs);return q}
 function hasQuoteContent(){return !!(document.getElementById("customer").value.trim()||document.getElementById("phone").value.trim()||document.getElementById("email").value.trim()||document.getElementById("installDate").value||document.getElementById("address").value.trim()||products.some((p,i)=>(Number(document.getElementById("q"+i)?.value)||0)>0)||Number(document.getElementById("delivery").value)||Number(document.getElementById("discount").value)||Number(document.getElementById("deposit").value)||document.getElementById("notes").value.trim()!=="Thank you for choosing Heart of Texas Tents!")}
 function clearCurrentQuote(){if(!confirm("Clear this quote? Your saved quotes and inventory will stay safe."))return;resetQuoteForm();}
-function resetQuoteForm(){["customer","phone","email","installDate","address"].forEach(id=>{const el=document.getElementById(id);if(el)el.value=""});products.forEach((p,i)=>{const q=document.getElementById("q"+i);if(q)q.value=""});["delivery","discount","deposit"].forEach(id=>{const el=document.getElementById(id);if(el)el.value=""});document.getElementById("taxRate").value="8.25";document.getElementById("notes").value="Thank you for choosing Heart of Texas Tents!";document.getElementById("quoteNo").value=quoteNumber();document.getElementById("created").value=today();calc();}
+function resetQuoteForm(){["customer","phone","email","installDate","address"].forEach(id=>{const el=document.getElementById(id);if(el)el.value=""});products.forEach((p,i)=>{const q=document.getElementById("q"+i);if(q)q.value=""});["delivery","discount","deposit"].forEach(id=>{const el=document.getElementById(id);if(el)el.value=""});document.getElementById("notes").value="Thank you for choosing Heart of Texas Tents!";document.getElementById("quoteNo").value=quoteNumber();document.getElementById("created").value=today();calc();}
 function showQuotes(){const p=document.getElementById("historyPanel");p.style.display="block";document.getElementById("calendarPanel").style.display="none";renderQuotes();p.scrollIntoView({behavior:"smooth",block:"start"})}
 function statusClass(status){return status==="DRAFT"?"st-draft":status==="QUOTE SENT"?"st-sent":status==="WAITING FOR DEPOSIT"?"st-deposit":status==="CONFIRMED"?"st-confirmed":"st-completed"}
 function renderQuotes(){const el=document.getElementById("historyList"),qs=getQuotes();if(!qs.length){el.innerHTML='<div class="empty">No saved quotes yet.</div>';return}el.innerHTML=qs.map(q=>{const cls=statusClass(q.status);const depositBtn=q.status==="DRAFT"?"":`<button style="background:#fef3c7;color:#92400e" onclick="sendDepositForQuote('${q.id}')">💳 SEND DEPOSIT</button>`;const bookingBtn=q.status!=="CONFIRMED"&&q.status!=="COMPLETED"?`<button style="background:#16834a;color:#fff" onclick="confirmBooking('${q.id}')">🟢 CONFIRM BOOKING</button>`:q.status==="CONFIRMED"?`<button style="background:#e5e7eb;color:#374151" onclick="markCompleted('${q.id}')">⚫ COMPLETED</button>`:`<button style="background:#e8edf2;color:#17264d" onclick="printSavedInvoice('${q.id}')">🧾 FINAL INVOICE</button>`;return `<div class="quoteRow"><div class="quoteTop"><b>${escapeHtml(q.customer||"Customer")}</b><span class="status ${cls}">${escapeHtml(q.status)}</span></div><div class="quoteMeta">Quote #${escapeHtml(q.id)} • ${q.installDate?dateFromValue(q.installDate):"Date TBD"} • <b>${escapeHtml(q.total)}</b><br>${escapeHtml(q.address||"Location not entered")}</div><div class="quoteActions"><button style="background:#e8edf2;color:#17264d" onclick="loadQuote('${q.id}')">VIEW / EDIT</button><button style="background:#f8fafc;color:#17264d" onclick="printSavedQuote('${q.id}')">📄 PDF</button>${depositBtn}${bookingBtn}<button style="background:#f8fafc;color:#17264d" onclick="deleteSavedQuote('${q.id}')">DELETE</button></div></div>`}).join("")}
 function dateFromValue(v){return new Date(v+"T00:00:00").toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}
-function loadQuote(id){const q=getQuotes().find(x=>x.id===id);if(!q)return;resetQuoteForm();document.getElementById("quoteNo").value=q.id;document.getElementById("created").value=q.created||today();["customer","phone","email","installDate","address","delivery","discount","taxRate","deposit","notes"].forEach(id=>{if(q[id]!==undefined&&document.getElementById(id))document.getElementById(id).value=q[id]});products.forEach((p,i)=>{const saved=q.items.find(x=>x.name===p.name);const el=document.getElementById("q"+i);if(el)el.value=saved?saved.qty:""});calc();window.scrollTo({top:0,behavior:"smooth"})}
+function loadQuote(id){const q=getQuotes().find(x=>x.id===id);if(!q)return;resetQuoteForm();document.getElementById("quoteNo").value=q.id;document.getElementById("created").value=q.created||today();["customer","phone","email","installDate","address","delivery","discount","deposit","notes"].forEach(id=>{if(q[id]!==undefined&&document.getElementById(id))document.getElementById(id).value=q[id]});products.forEach((p,i)=>{const saved=q.items.find(x=>x.name===p.name);const el=document.getElementById("q"+i);if(el)el.value=saved?saved.qty:""});calc();window.scrollTo({top:0,behavior:"smooth"})}
 function deleteSavedQuote(id){if(!confirm("Delete this saved quote?"))return;saveQuotes(getQuotes().filter(q=>q.id!==id));renderQuotes()}
 function depositLink(){return localStorage.getItem("httSquareDepositLink")||""}
 function sendDepositForQuote(id){const q=getQuotes().find(x=>x.id===id);if(!q)return;const link=depositLink();if(!link){alert("Add your Square deposit payment link in Inventory Admin first.");toggleAdmin();return}const amount=q.deposit>0?money(q.deposit):"the required deposit";const msg=`Great! Thank you for choosing Heart of Texas Tents!\n\nYour rental is ready to be confirmed. A deposit of ${amount} is required to secure your date.\n\nYou can make your deposit securely here:\n${link}\n\nThank you!\nHeart of Texas Tents`;
@@ -335,7 +333,7 @@ function calendarDetailsHtml(dateStr,jobs){if(!jobs.length)return `<div class="e
 function buildQuote(){
  const customer=document.getElementById("customer").value.trim(),phone=document.getElementById("phone").value.trim(),email=document.getElementById("email").value.trim(),install=document.getElementById("installDate").value,address=document.getElementById("address").value.trim(),lines=[];
  products.forEach((p,i)=>{const q=Number(document.getElementById("q"+i)?.value)||0;if(q>0)lines.push(`${q} x ${p.name} — ${money(q*p.price)}`)});
- const parts=[`HEART OF TEXAS TENTS`,`QUOTE #${document.getElementById("quoteNo").value}`];if(customer)parts.push(`Customer: ${customer}`);if(phone)parts.push(`Phone: ${phone}`);if(email)parts.push(`Email: ${email}`);if(install)parts.push(`Installation Date: ${dateText("installDate")}`);if(address)parts.push(`Location: ${address}`);parts.push(`\n${lines.length?lines.join("\n"):"No rental items selected."}`);parts.push(`\nRental Items: ${document.getElementById("rentals").textContent}`);const delivery=Number(document.getElementById("delivery").value)||0,discount=Number(document.getElementById("discount").value)||0,rate=Number(document.getElementById("taxRate").value)||0,deposit=Number(document.getElementById("deposit").value)||0;if(delivery)parts.push(`Delivery / Setup: ${document.getElementById("deliveryOut").textContent}`);if(discount)parts.push(`Discount: ${document.getElementById("discountOut").textContent}`);if(rate)parts.push(`Tax: ${document.getElementById("taxOut").textContent}`);parts.push(`TOTAL: ${document.getElementById("total").textContent}`);if(deposit)parts.push(`Deposit: ${document.getElementById("depositOut").textContent}\nBALANCE DUE: ${document.getElementById("balance").textContent}`);const notes=document.getElementById("notes").value.trim();if(notes)parts.push(`\n${notes}`);parts.push(`\nHeart of Texas Tents\nWaco, TX & surrounding areas\nHigh Peak Tents • Event Lighting • Tables • Chairs • Side Walls\n(254) 900-7588 • Text/WhatsApp (254) 495-5082\nheartoftexastents@gmail.com • heartoftexastents.com • Se habla español`);return parts.join("\n\n");
+ const parts=[`HEART OF TEXAS TENTS`,`QUOTE #${document.getElementById("quoteNo").value}`];if(customer)parts.push(`Customer: ${customer}`);if(phone)parts.push(`Phone: ${phone}`);if(email)parts.push(`Email: ${email}`);if(install)parts.push(`Installation Date: ${dateText("installDate")}`);if(address)parts.push(`Location: ${address}`);parts.push(`\n${lines.length?lines.join("\n"):"No rental items selected."}`);parts.push(`\nRental Items: ${document.getElementById("rentals").textContent}`);const delivery=Number(document.getElementById("delivery").value)||0,discount=Number(document.getElementById("discount").value)||0,deposit=Number(document.getElementById("deposit").value)||0;if(delivery)parts.push(`Delivery / Setup: ${document.getElementById("deliveryOut").textContent}`);if(discount)parts.push(`Discount: ${document.getElementById("discountOut").textContent}`);parts.push(`TOTAL: ${document.getElementById("total").textContent}`);if(deposit)parts.push(`Deposit: ${document.getElementById("depositOut").textContent}\nBALANCE DUE: ${document.getElementById("balance").textContent}`);const notes=document.getElementById("notes").value.trim();if(notes)parts.push(`\n${notes}`);parts.push(`\nHeart of Texas Tents\nWaco, TX & surrounding areas\nHigh Peak Tents • Event Lighting • Tables • Chairs • Side Walls\n(254) 900-7588 • Text/WhatsApp (254) 495-5082\nheartoftexastents@gmail.com • heartoftexastents.com • Se habla español`);return parts.join("\n\n");
 }
 function saveDraft(){if(!hasQuoteContent()){alert("Add at least one rental item or customer/event detail before saving.");return}const q=saveCurrentQuote("DRAFT");renderQuotes();alert("Quote #"+q.id+" saved as DRAFT. It has not been sent to the customer.")}
 function saveBeforeSend(){return saveCurrentQuote("QUOTE SENT")}
@@ -349,78 +347,9 @@ function printSavedQuote(id){const q=getQuotes().find(x=>x.id===id);if(!q)return
 function printSavedInvoice(id){const q=getQuotes().find(x=>x.id===id);if(!q)return;window.currentPaymentMethod=q.paymentMethod||"Square";window.currentPaidDate=q.paidDate||today();loadQuote(id);setTimeout(()=>printQuote("invoice"),50)}
 function bytesFromBase64(dataUrl){const b64=dataUrl.split(",")[1]||"";const bin=atob(b64);const out=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);return out}
 function buildPdfFromJpeg(jpeg,w,h){const enc=new TextEncoder();const parts=[];const offsets=[];let pos=0;const push=s=>{const b=typeof s==="string"?enc.encode(s):s;parts.push(b);pos+=b.length};const obj=(n,body)=>{offsets[n]=pos;push(`${n} 0 obj\n${body}\nendobj\n`)};push("%PDF-1.3\n%\xFF\xFF\xFF\xFF\n");obj(1,"<< /Type /Catalog /Pages 2 0 R >>");obj(2,"<< /Type /Pages /Kids [3 0 R] /Count 1 >>");obj(3,"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>");offsets[4]=pos;push(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${w} /Height ${h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`);push(jpeg);push("\nendstream\nendobj\n");const stream=`q\n612 0 0 792 0 0 cm\n/Im0 Do\nQ\n`;obj(5,`<< /Length ${enc.encode(stream).length} >>\nstream\n${stream}endstream`);const xref=pos;push("xref\n0 6\n0000000000 65535 f \n");for(let i=1;i<=5;i++)push(String(offsets[i]).padStart(10,"0")+" 00000 n \n");push(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);const total=parts.reduce((n,b)=>n+b.length,0),all=new Uint8Array(total);let off=0;for(const b of parts){all.set(b,off);off+=b.length}return all}
-async function sharePdfFile(){
-  // Direct iPhone Share Sheet: build the same one-page professional quote as a PDF file.
-  try{
-    const escXml=v=>String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-    const logo=document.querySelector(".logo")?.src||"";
-    const customer=document.getElementById("customer").value.trim();
-    const phone=document.getElementById("phone").value.trim();
-    const email=document.getElementById("email").value.trim();
-    const install=document.getElementById("installDate").value ? dateText("installDate") : "";
-    const address=document.getElementById("address").value.trim();
-    const quoteNo=document.getElementById("quoteNo").value||"Quote";
-    const notes=document.getElementById("notes").value.trim();
-    const delivery=Number(document.getElementById("delivery").value)||0;
-    const discount=Number(document.getElementById("discount").value)||0;
-    const rate=Number(document.getElementById("taxRate").value)||0;
-    const deposit=Number(document.getElementById("deposit").value)||0;
-    let rows="", y=330, selected=0;
-    products.forEach((p,i)=>{const q=Number(document.getElementById("q"+i)?.value||0);if(q>0){selected++;rows+=`<rect x="62" y="${y}" width="688" height="30" fill="#ffffff" stroke="#d9dee8"/><text x="78" y="${y+20}" class="t">${q}</text><text x="140" y="${y+20}" class="t">${escXml(p.name)}</text><text x="505" y="${y+20}" class="t right">${money(p.price)}</text><text x="735" y="${y+20}" class="t right">${money(q*p.price)}</text>`;y+=30;}});
-    if(!selected){rows='<rect x="62" y="330" width="688" height="30" fill="#ffffff" stroke="#d9dee8"/><text x="406" y="350" class="t center">No rental items selected.</text>';y=360;}
-    const info=[];
-    if(customer)info.push(`<text x="78" y="${y+28}" class="label">CUSTOMER / COMPANY</text><text x="78" y="${y+46}" class="value">${escXml(customer)}</text>`);
-    if(install)info.push(`<text x="410" y="${y+28}" class="label">INSTALLATION DATE</text><text x="410" y="${y+46}" class="value">${escXml(install)}</text>`);
-    y+=70;
-    if(address){info.push(`<text x="78" y="${y}" class="label">EVENT LOCATION</text><text x="78" y="${y+19}" class="value">${escXml(address)}</text>`);y+=48;}
-    if(phone||email){info.push(`<text x="78" y="${y}" class="label">CUSTOMER CONTACT</text><text x="78" y="${y+19}" class="value">${escXml([phone,email].filter(Boolean).join(" • "))}</text>`);y+=48;}
-    const totalsY=Math.max(y+10,520);
-    let totalLines=`<text x="575" y="${totalsY}" class="t right">Rental Items</text><text x="738" y="${totalsY}" class="t right bold">${escXml(document.getElementById("rentals").textContent)}</text>`;
-    let ty=totalsY+25;
-    if(delivery){totalLines+=`<text x="575" y="${ty}" class="t right">Delivery / Setup</text><text x="738" y="${ty}" class="t right bold">${escXml(document.getElementById("deliveryOut").textContent)}</text>`;ty+=25;}
-    if(discount){totalLines+=`<text x="575" y="${ty}" class="t right">Discount</text><text x="738" y="${ty}" class="t right bold">${escXml(document.getElementById("discountOut").textContent)}</text>`;ty+=25;}
-    if(rate){totalLines+=`<text x="575" y="${ty}" class="t right">Tax</text><text x="738" y="${ty}" class="t right bold">${escXml(document.getElementById("taxOut").textContent)}</text>`;ty+=25;}
-    totalLines+=`<line x1="575" y1="${ty+4}" x2="738" y2="${ty+4}" stroke="#b8202a" stroke-width="2"/><text x="575" y="${ty+30}" class="grand">TOTAL</text><text x="738" y="${ty+30}" class="grand right">${escXml(document.getElementById("total").textContent)}</text>`;ty+=58;
-    if(deposit){totalLines+=`<text x="575" y="${ty}" class="t right">Deposit</text><text x="738" y="${ty}" class="t right bold">${escXml(document.getElementById("depositOut").textContent)}</text><text x="575" y="${ty+25}" class="label right">BALANCE DUE</text><text x="738" y="${ty+25}" class="grand right">${escXml(document.getElementById("balance").textContent)}</text>`;ty+=48;}
-    const noteY=Math.min(Math.max(ty+18,650),735);
-    const noteText=notes||"Thank you for choosing Heart of Texas Tents!";
-    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="816" height="1056" viewBox="0 0 816 1056"><style>
-      .t{font-family:Arial,Helvetica,sans-serif;font-size:12px;fill:#17264d}.label{font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;fill:#6b7890}.value{font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;fill:#17264d}.bold{font-weight:700}.right{text-anchor:end}.center{text-anchor:middle}.grand{font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;fill:#17264d}.title{font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:800;fill:#b8202a}.head{font-family:Arial,Helvetica,sans-serif;font-size:24px;font-weight:800;fill:#17264d}.small{font-family:Arial,Helvetica,sans-serif;font-size:10px;fill:#6b7890}.contact{font-family:Arial,Helvetica,sans-serif;font-size:10px;fill:#6b7890}.white{font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;fill:#fff}</style>
-      <rect width="816" height="1056" fill="#fff"/><rect x="62" y="30" width="688" height="8" fill="#17264d"/><rect x="62" y="38" width="688" height="145" rx="10" fill="#fff" stroke="#d9dee8"/>
-      ${logo?`<image href="${escXml(logo)}" x="78" y="62" width="82" height="82" preserveAspectRatio="xMidYMid meet"/>`:""}
-      <text x="178" y="78" class="head">HEART OF TEXAS TENTS</text><text x="178" y="98" class="small">EVENT RENTALS • WACO, TEXAS &amp; SURROUNDING AREAS</text><text x="178" y="118" class="small" fill="#b8202a">HIGH PEAK TENTS • EVENT LIGHTING • TABLES • CHAIRS • SIDE WALLS</text>
-      <text x="520" y="76" class="contact">Calls: (254) 900-7588</text><text x="520" y="92" class="contact">Text / WhatsApp: (254) 495-5082</text><text x="520" y="108" class="contact">Email: heartoftexastents@gmail.com</text><text x="520" y="124" class="contact">Web: www.heartoftexastents.com</text><text x="520" y="140" class="contact">Se habla español</text>
-      <rect x="62" y="183" width="688" height="34" fill="#17264d"/><text x="406" y="205" class="white center">VISIT OUR WEBSITE: www.heartoftexastents.com  •  SE HABLA ESPAÑOL</text>
-      <rect x="62" y="217" width="688" height="58" fill="#f4f6f9" stroke="#d9dee8"/><text x="78" y="252" class="title">RENTAL QUOTE</text><text x="738" y="242" class="small right">Quote #: ${escXml(quoteNo)}</text><text x="738" y="258" class="small right">Created: ${escXml(dateText("created"))}</text>
-      <rect x="62" y="285" width="688" height="30" fill="#17264d"/><text x="78" y="305" class="white">QTY</text><text x="140" y="305" class="white">RENTAL ITEM</text><text x="505" y="305" class="white right">UNIT PRICE</text><text x="738" y="305" class="white right">AMOUNT</text>
-      ${rows}${info.join("")}
-      ${totalLines}
-      <rect x="62" y="${noteY}" width="688" height="58" rx="7" fill="#fff" stroke="#d9dee8"/><rect x="62" y="${noteY}" width="5" height="58" fill="#b8202a"/><text x="78" y="${noteY+20}" class="label">NOTES</text><text x="78" y="${noteY+40}" class="value">${escXml(noteText)}</text>
-      <rect x="62" y="900" width="688" height="95" rx="10" fill="#17264d"/><text x="406" y="925" class="white center">Thank you for choosing Heart of Texas Tents • Waco, TX &amp; surrounding areas</text><text x="406" y="944" class="white center">High Peak Tents • Event Lighting • Tables • Chairs • Side Walls</text><text x="406" y="963" class="white center">(254) 900-7588 • Text/WhatsApp (254) 495-5082 • heartoftexastents@gmail.com</text><text x="406" y="982" class="white center">WEBSITE: www.heartoftexastents.com • SE HABLA ESPAÑOL</text>
-    </svg>`;
-    const svgBlob=new Blob([svg],{type:"image/svg+xml;charset=utf-8"});
-    const svgUrl=URL.createObjectURL(svgBlob),img=new Image();
-    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=svgUrl});
-    const scale=2,canvas=document.createElement("canvas");canvas.width=816*scale;canvas.height=1056*scale;const ctx=canvas.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);URL.revokeObjectURL(svgUrl);
-    const jpeg=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.94));if(!jpeg)throw new Error("Could not create PDF image");
-    const pdfBytes=buildPdfFromJpeg(new Uint8Array(await jpeg.arrayBuffer()),canvas.width,canvas.height);
-    const file=new File([pdfBytes],`Heart-of-Texas-Tents-Quote-${quoteNo}.pdf`,{type:"application/pdf"});
-    if(navigator.share){
-      try{
-        await navigator.share({title:"Heart of Texas Tents Quote",text:"Rental Quote - Heart of Texas Tents",files:[file]});
-        return;
-      }catch(shareErr){
-        if(shareErr && shareErr.name === "AbortError") return;
-      }
-    }
-    const url=URL.createObjectURL(file);
-    window.open(url,"_blank");
-    setTimeout(()=>URL.revokeObjectURL(url),60000);
-    alert("The PDF was created. Tap the Share button in the PDF viewer to send it.");
-  }catch(e){console.error(e);alert("Share PDF is not available on this browser. Please use Professional PDF.");}
-}
+function sharePdfFile(){ printQuote("quote"); }
 function escPdf(s){return escapeHtml(String(s||""))}
-function printQuote(mode="quote",doPrint=true){
+function printQuote(mode="quote"){
   document.body.classList.add("printing");
   const logo=document.querySelector(".logo")?.src||"";
   const customer=document.getElementById("customer").value.trim();
@@ -438,8 +367,8 @@ function printQuote(mode="quote",doPrint=true){
   if(install) info.push(`<div class="pdfBox"><div class="pdfLabel">Installation Date</div><div class="pdfValue">${escPdf(install)}</div></div>`);
   if(address) info.push(`<div class="pdfBox pdfBoxWide"><div class="pdfLabel">Event Location</div><div class="pdfValue">${escPdf(address)}</div></div>`);
   if(phone||email) info.push(`<div class="pdfBox pdfBoxWide"><div class="pdfLabel">Customer Contact</div><div class="pdfValue">${escPdf([phone,email].filter(Boolean).join(" • "))}</div></div>`);
-  const delivery=Number(document.getElementById("delivery").value)||0, discount=Number(document.getElementById("discount").value)||0, rate=Number(document.getElementById("taxRate").value)||0, deposit=Number(document.getElementById("deposit").value)||0;
-  const optionalTotals=`${delivery?`<div class="pdfTotalRow"><span>Delivery / Setup</span><b>${document.getElementById("deliveryOut").textContent}</b></div>`:""}${discount?`<div class="pdfTotalRow"><span>Discount</span><b>${document.getElementById("discountOut").textContent}</b></div>`:""}${rate?`<div class="pdfTotalRow"><span>Tax</span><b>${document.getElementById("taxOut").textContent}</b></div>`:""}`;
+  const delivery=Number(document.getElementById("delivery").value)||0, discount=Number(document.getElementById("discount").value)||0, deposit=Number(document.getElementById("deposit").value)||0;
+  const optionalTotals=`${delivery?`<div class="pdfTotalRow"><span>Delivery / Setup</span><b>${document.getElementById("deliveryOut").textContent}</b></div>`:""}${discount?`<div class="pdfTotalRow"><span>Discount</span><b>${document.getElementById("discountOut").textContent}</b></div>`:""}`;
   document.getElementById("pdfQuote").innerHTML=`
    <div class="pdfSheet"><div class="pdfTop"></div>
     <div class="pdfHead"><img class="pdfLogo" src="${logo}" alt="Heart of Texas Tents"><div class="pdfBrand"><h1>HEART OF TEXAS TENTS</h1><p>EVENT RENTALS • WACO, TEXAS & SURROUNDING AREAS</p><p style="margin-top:3px;font-size:7.5pt;color:#b8202a;font-weight:800">HIGH PEAK TENTS • EVENT LIGHTING • TABLES • CHAIRS • SIDE WALLS</p></div><div class="pdfContact"><b>Calls:</b> (254) 900-7588<br><b>Text / WhatsApp:</b> (254) 495-5082<br><b>Email:</b> heartoftexastents@gmail.com<br><b>Web:</b> www.heartoftexastents.com<br><b>Se habla español</b></div></div><div class="pdfWebsiteBar">VISIT OUR WEBSITE: <strong>www.heartoftexastents.com</strong> &nbsp;•&nbsp; SE HABLA ESPAÑOL</div>
@@ -449,14 +378,62 @@ function printQuote(mode="quote",doPrint=true){
     <div class="pdfTotalsArea"><div class="pdfTotals"><div class="pdfTotalRow"><span>Rental Items</span><b>${document.getElementById("rentals").textContent}</b></div>${optionalTotals}<div class="pdfTotalRow pdfGrand"><span>TOTAL</span><span>${document.getElementById("total").textContent}</span></div>${deposit?`<div class="pdfTotalRow"><span>Deposit</span><b>${document.getElementById("depositOut").textContent}</b></div>`:""}${mode==="invoice"?`<div class="pdfTotalRow"><span>Amount Paid</span><b>${document.getElementById("total").textContent}</b></div><div class="pdfTotalRow pdfBalance"><span>BALANCE PAID</span><span>$0.00</span></div><div class="pdfTotalRow"><span>Payment Method</span><b>${escPdf(window.currentPaymentMethod||"Square")}</b></div>`:deposit?`<div class="pdfTotalRow pdfBalance"><span>BALANCE DUE</span><span>${document.getElementById("balance").textContent}</span></div>`:""}</div></div>
     ${notes?`<div class="pdfNotes"><div class="pdfLabel">Notes</div><div class="pdfValue">${escPdf(notes)}</div></div>`:""}
     <div class="pdfFooter">Thank you for choosing <b>Heart of Texas Tents</b> • Waco, TX & surrounding areas<br>High Peak Tents • Event Lighting • Tables • Chairs • Side Walls<br>Calls: (254) 900-7588 • Text/WhatsApp: (254) 495-5082 • heartoftexastents@gmail.com<br><b style="font-size:9pt">WEBSITE: www.heartoftexastents.com • SE HABLA ESPAÑOL</b></div></div>`;
-  if(doPrint){
-    const startPrint=()=>window.print();
-    setTimeout(startPrint,500);
-    window.onafterprint=function(){document.body.classList.remove("printing");window.onafterprint=null;};
-  }
+  window.onafterprint=function(){document.body.classList.remove("printing");window.onafterprint=null;};
+  // Wait for the quote sheet and embedded logo to be laid out before opening iOS print preview.
+  const startPrint=()=>{requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>window.print(),350)))};
+  startPrint();
 }
+async function saveQuoteImage(){
+  const W=2550,H=3300,scale=1;
+  const canvas=document.createElement("canvas");canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext("2d");
+  ctx.fillStyle="#ffffff";ctx.fillRect(0,0,W,H);
+  const navy="#17264d",red="#b8202a",gray="#66758c",border="#d9e0e8";
+  const margin=205,right=W-margin,contentW=right-margin;
+  let y=125;
+  ctx.fillStyle=navy;ctx.fillRect(margin,y,contentW,24);y+=24;
+  // Company header
+  ctx.strokeStyle=border;ctx.lineWidth=3;ctx.strokeRect(margin,y,contentW,330);
+  const logo=document.querySelector(".logo");
+  if(logo&&logo.complete){try{ctx.drawImage(logo,margin+28,y+40,250,230)}catch(e){}}
+  ctx.fillStyle=navy;ctx.textAlign="left";ctx.font="bold 54px Georgia";ctx.fillText("HEART OF TEXAS TENTS",margin+310,y+83);
+  ctx.fillStyle=gray;ctx.font="bold 25px Arial";ctx.fillText("EVENT RENTALS • WACO, TEXAS & SURROUNDING AREAS",margin+310,y+130);
+  ctx.fillStyle=red;ctx.font="bold 22px Arial";ctx.fillText("HIGH PEAK TENTS • EVENT LIGHTING • TABLES • CHAIRS • SIDE WALLS",margin+310,y+176);
+  ctx.fillStyle="#44546c";ctx.textAlign="right";ctx.font="22px Arial";
+  const contactX=right-24;
+  ["Calls: (254) 900-7588","Text / WhatsApp: (254) 495-5082","Email: heartoftexastents@gmail.com","Web: www.heartoftexastents.com","Se habla español"].forEach((t,i)=>ctx.fillText(t,contactX,y+70+i*43));
+  y+=330;
+  ctx.fillStyle=navy;ctx.fillRect(margin,y,contentW,62);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="bold 24px Arial";ctx.fillText("VISIT OUR WEBSITE: www.heartoftexastents.com  •  SE HABLA ESPAÑOL",W/2,y+40);y+=62;
+  ctx.fillStyle="#f4f6f8";ctx.fillRect(margin,y,contentW,105);ctx.strokeStyle=border;ctx.strokeRect(margin,y,contentW,105);
+  ctx.fillStyle=red;ctx.textAlign="left";ctx.font="bold 42px Arial";ctx.fillText("RENTAL QUOTE",margin+35,y+63);
+  ctx.fillStyle=navy;ctx.textAlign="right";ctx.font="bold 23px Arial";ctx.fillText("Quote #: "+document.getElementById("quoteNo").value,right-28,y+42);ctx.font="22px Arial";ctx.fillText("Created: "+dateText("created"),right-28,y+76);y+=140;
+  // Optional customer information
+  const cust=document.getElementById("customer").value.trim(),install=document.getElementById("installDate").value?dateText("installDate"):"",addr=document.getElementById("address").value.trim(),phone=document.getElementById("phone").value.trim(),email=document.getElementById("email").value.trim();
+  ctx.fillStyle=gray;ctx.font="bold 20px Arial";ctx.textAlign="left";
+  const info=[];if(cust)info.push(["CUSTOMER / COMPANY",cust]);if(install)info.push(["INSTALLATION DATE",install]);if(addr)info.push(["EVENT LOCATION",addr]);if(phone||email)info.push(["CUSTOMER CONTACT",[phone,email].filter(Boolean).join(" • ")]);
+  let ix=0;info.forEach(([lab,val])=>{const col=ix%2,row=Math.floor(ix/2),x=margin+col*(contentW/2),iy=y+row*100;ctx.strokeStyle=border;ctx.lineWidth=2;ctx.strokeRect(x,iy,contentW/2-12,82);ctx.fillStyle=gray;ctx.font="bold 18px Arial";ctx.fillText(lab,x+18,iy+28);ctx.fillStyle=navy;ctx.font="bold 24px Arial";wrapCanvasText(ctx,val,x+18,iy+61,contentW/2-48,28);ix++});
+  y+=Math.ceil(info.length/2)*100+28;
+  // Rental items table
+  const col=[margin,margin+165,margin+1160,margin+1630,right];
+  ctx.fillStyle=navy;ctx.fillRect(margin,y,contentW,62);ctx.fillStyle="#fff";ctx.font="bold 23px Arial";ctx.textAlign="left";ctx.fillText("QTY",col[0]+24,y+40);ctx.fillText("RENTAL ITEM",col[1]+22,y+40);ctx.textAlign="right";ctx.fillText("UNIT PRICE",col[3]-18,y+40);ctx.fillText("AMOUNT",col[4]-22,y+40);y+=62;
+  let selected=0;products.forEach((p,i)=>{const q=Number(document.getElementById("q"+i)?.value||0);if(q<=0)return;selected++;ctx.fillStyle="#fff";ctx.fillRect(margin,y,contentW,65);ctx.strokeStyle=border;ctx.strokeRect(margin,y,contentW,65);ctx.fillStyle=navy;ctx.font="24px Arial";ctx.textAlign="center";ctx.fillText(String(q),(col[0]+col[1])/2,y+41);ctx.textAlign="left";ctx.fillText(p.name,col[1]+22,y+41);ctx.textAlign="right";ctx.fillText(money(p.price),col[3]-18,y+41);ctx.font="bold 24px Arial";ctx.fillText(money(q*p.price),col[4]-22,y+41);y+=65});
+  if(!selected){ctx.fillStyle=navy;ctx.font="24px Arial";ctx.textAlign="center";ctx.fillText("No rental items selected.",W/2,y+43);y+=65}
+  y+=55;
+  const totalRows=[["Rental Items",document.getElementById("rentals").textContent]];
+  const delivery=Number(document.getElementById("delivery").value)||0,discount=Number(document.getElementById("discount").value)||0,deposit=Number(document.getElementById("deposit").value)||0;
+  if(delivery)totalRows.push(["Delivery / Setup",document.getElementById("deliveryOut").textContent]);if(discount)totalRows.push(["Discount",document.getElementById("discountOut").textContent]);
+  const tw=900,tx=right-tw;totalRows.forEach(([a,b])=>{ctx.fillStyle=navy;ctx.font="25px Arial";ctx.textAlign="left";ctx.fillText(a,tx,y);ctx.textAlign="right";ctx.font="bold 25px Arial";ctx.fillText(b,right-15,y);y+=52});
+  ctx.strokeStyle=red;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(tx,y-8);ctx.lineTo(right,y-8);ctx.stroke();ctx.fillStyle=navy;ctx.font="bold 43px Arial";ctx.textAlign="left";ctx.fillText("TOTAL",tx,y+50);ctx.textAlign="right";ctx.fillText(document.getElementById("total").textContent,right-15,y+50);y+=82;
+  if(deposit){ctx.font="25px Arial";ctx.textAlign="left";ctx.fillText("Deposit",tx,y);ctx.textAlign="right";ctx.font="bold 25px Arial";ctx.fillText(document.getElementById("depositOut").textContent,right-15,y);y+=52;ctx.font="bold 29px Arial";ctx.textAlign="left";ctx.fillText("BALANCE DUE",tx,y);ctx.textAlign="right";ctx.fillText(document.getElementById("balance").textContent,right-15,y);y+=60}
+  const notes=document.getElementById("notes").value.trim();if(notes){y+=20;ctx.strokeStyle=border;ctx.lineWidth=3;ctx.strokeRect(margin,y,contentW,120);ctx.fillStyle=red;ctx.fillRect(margin,y,14,120);ctx.fillStyle=gray;ctx.textAlign="left";ctx.font="bold 18px Arial";ctx.fillText("NOTES",margin+32,y+32);ctx.fillStyle=navy;ctx.font="bold 24px Arial";wrapCanvasText(ctx,notes,margin+32,y+70,contentW-70,30);y+=145}
+  // Footer anchored at the bottom for a print-ready Letter image.
+  const fy=H-500;ctx.fillStyle=navy;ctx.fillRect(margin,fy,contentW,300);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="24px Arial";ctx.fillText("Thank you for choosing Heart of Texas Tents • Waco, TX & surrounding areas",W/2,fy+65);ctx.fillText("High Peak Tents • Event Lighting • Tables • Chairs • Side Walls",W/2,fy+110);ctx.fillText("(254) 900-7588 • Text/WhatsApp: (254) 495-5082",W/2,fy+155);ctx.fillText("heartoftexastents@gmail.com",W/2,fy+200);ctx.font="bold 25px Arial";ctx.fillText("WEBSITE: www.heartoftexastents.com • SE HABLA ESPAÑOL",W/2,fy+245);
+  canvas.toBlob(async blob=>{if(!blob){alert("Could not create the image. Please try again.");return}const filename="Heart_of_Texas_Tents_Quote_"+document.getElementById("quoteNo").value+".png";const file=new File([blob],filename,{type:"image/png"});try{if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({files:[file],title:"Heart of Texas Tents Quote",text:"Save this quote image to Photos to print."});}else{const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);alert("Quote image created. Open the downloaded image and save it to Photos to print.")}}catch(e){if(e.name!=="AbortError"){const url=URL.createObjectURL(blob);window.open(url,"_blank");alert("The image is ready. Use Share, then Save Image to add it to Photos.")}}},"image/png");
+}
+function wrapCanvasText(ctx,text,x,y,maxWidth,lineHeight){const words=String(text||"").split(/\s+/);let line="";for(const word of words){const test=line?line+" "+word:word;if(ctx.measureText(test).width>maxWidth&&line){ctx.fillText(line,x,y);line=word;y+=lineHeight}else line=test}if(line)ctx.fillText(line,x,y)}
+
 function newQuote(){if(!confirm("Start a new quote? Your saved quotes and inventory will stay safe."))return;if(hasQuoteContent()){if(confirm("Save this quote as a DRAFT before starting a new one?"))saveCurrentQuote("DRAFT")}resetQuoteForm();window.scrollTo({top:0,behavior:"smooth"})}
-["delivery","discount","taxRate","deposit","customer","phone","email","installDate","address","notes"].forEach(id=>document.getElementById(id).addEventListener("input",calc));
+["delivery","discount","deposit","customer","phone","email","installDate","address","notes"].forEach(id=>document.getElementById(id).addEventListener("input",calc));
 // Keep quantity fields blank by default and calculate immediately as the user types.
 document.addEventListener("input",function(e){
   if(e.target.matches("input.qty")) calc();
