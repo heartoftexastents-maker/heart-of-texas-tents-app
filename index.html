@@ -396,6 +396,12 @@ function buildPdfFromJpeg(jpeg,w,h){const enc=new TextEncoder();const parts=[];c
 function sharePdfFile(){ printQuote("quote"); }
 function escPdf(s){return escapeHtml(String(s||""))}
 function printQuote(mode="quote"){
+  // iOS Home Screen web apps may not open Safari's print sheet. Export a real PDF file instead.
+  if (window.navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches) {
+    saveQuoteImage(true);
+    return;
+  }
+
   const pdfRoot=document.getElementById("pdfQuote");
   if(!pdfRoot){alert("PDF area is missing. Please reload the app.");return;}
   try { saveCurrentQuote(mode==="invoice"?"COMPLETED":"QUOTE SENT"); } catch(e) {}
@@ -447,7 +453,7 @@ function printQuote(mode="quote"){
   };
   startPrint();
 }
-async function saveQuoteImage(){
+async function saveQuoteImage(asPdf=false){
   document.body.classList.remove("printing");
   // IMAGE EXPORT REVISION: US Letter portrait canvas matching Professional PDF; contact text enlarged.
   // US Letter portrait canvas, matching the Professional PDF page proportions.
@@ -467,18 +473,18 @@ async function saveQuoteImage(){
   if(logo&&logo.complete&&logo.naturalWidth>0){try{ctx.drawImage(logo,margin+28,headerY+48,270,250)}catch(e){}}
   const brandX=margin+330;
   const contactX=right-24;
-  const contactStart=right-735;
+  const contactStart=right-850;
   ctx.save();
-  ctx.beginPath();ctx.rect(brandX,headerY+18,contactStart-brandX-32,headerH-36);ctx.clip();
-  ctx.fillStyle=navy;ctx.textAlign="left";ctx.font="bold 60px Georgia";
-  ctx.fillText("HEART OF TEXAS TENTS",brandX,headerY+91);
-  ctx.fillStyle=gray;ctx.font="bold 27px Arial";
-  wrapCanvasText(ctx,"EVENT RENTALS • WACO, TEXAS & SURROUNDING AREAS",brandX,headerY+142,contactStart-brandX-48,32);
-  ctx.fillStyle=red;ctx.font="bold 25px Arial";
-  wrapCanvasText(ctx,"HIGH PEAK TENTS • EVENT LIGHTING • TABLES • CHAIRS • SIDE WALLS",brandX,headerY+205,contactStart-brandX-48,31);
+  ctx.beginPath();ctx.rect(brandX,headerY+18,contactStart-brandX-34,headerH-36);ctx.clip();
+  ctx.fillStyle=navy;ctx.textAlign="left";ctx.font="bold 56px Georgia";
+  ctx.fillText("HEART OF TEXAS TENTS",brandX,headerY+83);
+  ctx.fillStyle=gray;ctx.font="bold 25px Arial";
+  wrapCanvasText(ctx,"EVENT RENTALS • WACO, TEXAS & SURROUNDING AREAS",brandX,headerY+132,contactStart-brandX-52,31);
+  ctx.fillStyle=red;ctx.font="bold 23px Arial";
+  wrapCanvasText(ctx,"HIGH PEAK TENTS • EVENT LIGHTING • TABLES • CHAIRS • SIDE WALLS",brandX,headerY+190,contactStart-brandX-52,30);
   ctx.restore();
-  ctx.fillStyle="#44546c";ctx.textAlign="right";ctx.font="bold 41px Arial";
-  ["Calls: (254) 900-7588","Text / WhatsApp: (254) 495-5082","Email: heartoftexastents@gmail.com","Web: www.heartoftexastents.com","Se habla español"].forEach((t,i)=>ctx.fillText(t,contactX,headerY+70+i*58));
+  ctx.fillStyle="#44546c";ctx.textAlign="right";ctx.font="bold 35px Arial";
+  ["Calls: (254) 900-7588","Text / WhatsApp: (254) 495-5082","Email: heartoftexastents@gmail.com","Web: www.heartoftexastents.com","Se habla español"].forEach((t,i)=>ctx.fillText(t,contactX,headerY+64+i*58));
   y+=headerH;
   ctx.fillStyle=navy;ctx.fillRect(margin,y,contentW,62);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="bold 36px Arial";ctx.fillText("VISIT OUR WEBSITE: www.heartoftexastents.com  •  SE HABLA ESPAÑOL",W/2,y+40);y+=62;
   ctx.fillStyle="#f4f6f8";ctx.fillRect(margin,y,contentW,105);ctx.strokeStyle=border;ctx.strokeRect(margin,y,contentW,105);
@@ -515,7 +521,36 @@ async function saveQuoteImage(){
   const exportCtx=exportCanvas.getContext("2d");
   exportCtx.fillStyle="#ffffff";exportCtx.fillRect(0,0,exportCanvas.width,exportCanvas.height);
   exportCtx.drawImage(canvas,0,0,canvas.width,canvas.height,0,0,exportCanvas.width,exportCanvas.height);
-  exportCanvas.toBlob(async blob=>{if(!blob){alert("Could not create the image. Please try again.");return}const filename="Heart_of_Texas_Tents_Quote_"+document.getElementById("quoteNo").value+".png";const file=new File([blob],filename,{type:"image/png"});try{if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({files:[file],title:"Heart of Texas Tents Quote",text:"Save this quote image to Photos to print."});}else{const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);alert("Quote image created. Open the downloaded image and save it to Photos to print.")}}catch(e){if(e.name!=="AbortError"){const url=URL.createObjectURL(blob);window.open(url,"_blank");alert("The image is ready. Use Share, then Save Image to add it to Photos.")}}},"image/png");
+  exportCanvas.toBlob(async blob=>{
+    if(!blob){alert(asPdf?"Could not create the PDF. Please try again.":"Could not create the image. Please try again.");return}
+    const quoteNo=document.getElementById("quoteNo").value;
+    try {
+      if(asPdf){
+        const jpegBlob=await new Promise(resolve=>exportCanvas.toBlob(resolve,"image/jpeg",0.96));
+        if(!jpegBlob) throw new Error("Could not render PDF image");
+        const jpegBytes=new Uint8Array(await jpegBlob.arrayBuffer());
+        const pdfBytes=buildPdfFromJpeg(jpegBytes,exportCanvas.width,exportCanvas.height);
+        const pdfFile=new File([pdfBytes],`Heart_of_Texas_Tents_Quote_${quoteNo}.pdf`,{type:"application/pdf"});
+        if(navigator.share && (!navigator.canShare || navigator.canShare({files:[pdfFile]}))){
+          await navigator.share({files:[pdfFile],title:"Heart of Texas Tents Quote",text:"PDF quote"});
+        } else {
+          const url=URL.createObjectURL(new Blob([pdfBytes],{type:"application/pdf"}));
+          const a=document.createElement("a");a.href=url;a.download=pdfFile.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+        }
+      } else {
+        const filename=`Heart_of_Texas_Tents_Quote_${quoteNo}.png`;
+        const file=new File([blob],filename,{type:"image/png"});
+        if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){
+          await navigator.share({files:[file],title:"Heart of Texas Tents Quote",text:"Save this quote image to Photos to print."});
+        } else {
+          const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+          alert("Quote image created. Open the downloaded image and save it to Photos to print.");
+        }
+      }
+    } catch(e) {
+      if(e.name!=="AbortError") alert(asPdf?"PDF export failed. Please try again in Safari.":"Image export failed. Please try again.");
+    }
+  },"image/png");
 }
 function wrapCanvasText(ctx,text,x,y,maxWidth,lineHeight){const words=String(text||"").split(/\s+/);let line="";for(const word of words){const test=line?line+" "+word:word;if(ctx.measureText(test).width>maxWidth&&line){ctx.fillText(line,x,y);line=word;y+=lineHeight}else line=test}if(line)ctx.fillText(line,x,y)}
 
