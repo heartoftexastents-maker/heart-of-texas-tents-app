@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="htt-pdf-version" content="2026-10-20-image-export-portrait-readable-v5">
+<meta name="htt-pdf-version" content="2026-10-20-image-export-letter-portrait-v6">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -449,6 +449,7 @@ function printQuote(mode="quote"){
 }
 async function saveQuoteImage(){
   document.body.classList.remove("printing");
+  // IMAGE EXPORT REVISION: US Letter portrait canvas matching Professional PDF; contact text enlarged.
   // US Letter portrait canvas, matching the Professional PDF page proportions.
   const W=2550,H=3300;
   const canvas=document.createElement("canvas");canvas.width=W;canvas.height=H;
@@ -466,9 +467,9 @@ async function saveQuoteImage(){
   ctx.fillStyle=navy;ctx.textAlign="left";ctx.font="bold 66px Georgia";ctx.fillText("HEART OF TEXAS TENTS",margin+330,y+92);
   ctx.fillStyle=gray;ctx.font="bold 32px Arial";ctx.fillText("EVENT RENTALS • WACO, TEXAS & SURROUNDING AREAS",margin+330,y+150);
   ctx.fillStyle=red;ctx.font="bold 28px Arial";ctx.fillText("HIGH PEAK TENTS • EVENT LIGHTING • TABLES • CHAIRS • SIDE WALLS",margin+330,y+202);
-  ctx.fillStyle="#44546c";ctx.textAlign="right";ctx.font="bold 44px Arial";
+  ctx.fillStyle="#44546c";ctx.textAlign="right";ctx.font="bold 57px Arial";
   const contactX=right-24;
-  ["Calls: (254) 900-7588","Text / WhatsApp: (254) 495-5082","Email: heartoftexastents@gmail.com","Web: www.heartoftexastents.com","Se habla español"].forEach((t,i)=>ctx.fillText(t,contactX,y+68+i*58));
+  ["Calls: (254) 900-7588","Text / WhatsApp: (254) 495-5082","Email: heartoftexastents@gmail.com","Web: www.heartoftexastents.com","Se habla español"].forEach((t,i)=>ctx.fillText(t,contactX,y+68+i*62));
   y+=370;
   ctx.fillStyle=navy;ctx.fillRect(margin,y,contentW,62);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="bold 36px Arial";ctx.fillText("VISIT OUR WEBSITE: www.heartoftexastents.com  •  SE HABLA ESPAÑOL",W/2,y+40);y+=62;
   ctx.fillStyle="#f4f6f8";ctx.fillRect(margin,y,contentW,105);ctx.strokeStyle=border;ctx.strokeRect(margin,y,contentW,105);
@@ -499,8 +500,12 @@ async function saveQuoteImage(){
   // Keep the footer directly after the quote content so the exported image has no huge blank gap.
   const fy=y+45;ctx.fillStyle=navy;ctx.fillRect(margin,fy,contentW,300);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="37px Arial";ctx.fillText("Thank you for choosing Heart of Texas Tents • Waco, TX & surrounding areas",W/2,fy+65);ctx.fillText("High Peak Tents • Event Lighting • Tables • Chairs • Side Walls",W/2,fy+110);ctx.fillText("(254) 900-7588 • Text/WhatsApp: (254) 495-5082",W/2,fy+155);ctx.fillText("heartoftexastents@gmail.com",W/2,fy+200);ctx.font="bold 38px Arial";ctx.fillText("WEBSITE: www.heartoftexastents.com • SE HABLA ESPAÑOL",W/2,fy+245);
   // Export a full US Letter portrait page, like Professional PDF.
-  const exportCanvas=document.createElement("canvas");exportCanvas.width=W;exportCanvas.height=H;
-  exportCanvas.getContext("2d").drawImage(canvas,0,0,W,H,0,0,W,H);
+  const exportCanvas=document.createElement("canvas");
+  // Force a real US Letter portrait raster: 8.5 × 11 inches at 300 dpi.
+  exportCanvas.width=2550;exportCanvas.height=3300;
+  const exportCtx=exportCanvas.getContext("2d");
+  exportCtx.fillStyle="#ffffff";exportCtx.fillRect(0,0,exportCanvas.width,exportCanvas.height);
+  exportCtx.drawImage(canvas,0,0,canvas.width,canvas.height,0,0,exportCanvas.width,exportCanvas.height);
   exportCanvas.toBlob(async blob=>{if(!blob){alert("Could not create the image. Please try again.");return}const filename="Heart_of_Texas_Tents_Quote_"+document.getElementById("quoteNo").value+".png";const file=new File([blob],filename,{type:"image/png"});try{if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({files:[file],title:"Heart of Texas Tents Quote",text:"Save this quote image to Photos to print."});}else{const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);alert("Quote image created. Open the downloaded image and save it to Photos to print.")}}catch(e){if(e.name!=="AbortError"){const url=URL.createObjectURL(blob);window.open(url,"_blank");alert("The image is ready. Use Share, then Save Image to add it to Photos.")}}},"image/png");
 }
 function wrapCanvasText(ctx,text,x,y,maxWidth,lineHeight){const words=String(text||"").split(/\s+/);let line="";for(const word of words){const test=line?line+" "+word:word;if(ctx.measureText(test).width>maxWidth&&line){ctx.fillText(line,x,y);line=word;y+=lineHeight}else line=test}if(line)ctx.fillText(line,x,y)}
