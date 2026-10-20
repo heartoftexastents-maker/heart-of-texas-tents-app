@@ -460,17 +460,26 @@ async function saveQuoteImage(){
   const margin=205,right=W-margin,contentW=right-margin;
   let y=125;
   ctx.fillStyle=navy;ctx.fillRect(margin,y,contentW,24);y+=24;
-  // Company header
-  ctx.strokeStyle=border;ctx.lineWidth=3;ctx.strokeRect(margin,y,contentW,370);
+  // Company header: separate left branding and right contact columns to prevent text overlap.
+  const headerY=y, headerH=370;
+  ctx.strokeStyle=border;ctx.lineWidth=3;ctx.strokeRect(margin,headerY,contentW,headerH);
   const logo=document.querySelector(".logo");
-  if(logo&&logo.complete&&logo.naturalWidth>0){try{ctx.drawImage(logo,margin+28,y+48,270,250)}catch(e){}}
-  ctx.fillStyle=navy;ctx.textAlign="left";ctx.font="bold 66px Georgia";ctx.fillText("HEART OF TEXAS TENTS",margin+330,y+92);
-  ctx.fillStyle=gray;ctx.font="bold 32px Arial";ctx.fillText("EVENT RENTALS • WACO, TEXAS & SURROUNDING AREAS",margin+330,y+150);
-  ctx.fillStyle=red;ctx.font="bold 28px Arial";ctx.fillText("HIGH PEAK TENTS • EVENT LIGHTING • TABLES • CHAIRS • SIDE WALLS",margin+330,y+202);
-  ctx.fillStyle="#44546c";ctx.textAlign="right";ctx.font="bold 57px Arial";
+  if(logo&&logo.complete&&logo.naturalWidth>0){try{ctx.drawImage(logo,margin+28,headerY+48,270,250)}catch(e){}}
+  const brandX=margin+330;
   const contactX=right-24;
-  ["Calls: (254) 900-7588","Text / WhatsApp: (254) 495-5082","Email: heartoftexastents@gmail.com","Web: www.heartoftexastents.com","Se habla español"].forEach((t,i)=>ctx.fillText(t,contactX,y+68+i*62));
-  y+=370;
+  const contactStart=right-735;
+  ctx.save();
+  ctx.beginPath();ctx.rect(brandX,headerY+18,contactStart-brandX-32,headerH-36);ctx.clip();
+  ctx.fillStyle=navy;ctx.textAlign="left";ctx.font="bold 60px Georgia";
+  ctx.fillText("HEART OF TEXAS TENTS",brandX,headerY+91);
+  ctx.fillStyle=gray;ctx.font="bold 27px Arial";
+  wrapCanvasText(ctx,"EVENT RENTALS • WACO, TEXAS & SURROUNDING AREAS",brandX,headerY+142,contactStart-brandX-48,32);
+  ctx.fillStyle=red;ctx.font="bold 25px Arial";
+  wrapCanvasText(ctx,"HIGH PEAK TENTS • EVENT LIGHTING • TABLES • CHAIRS • SIDE WALLS",brandX,headerY+205,contactStart-brandX-48,31);
+  ctx.restore();
+  ctx.fillStyle="#44546c";ctx.textAlign="right";ctx.font="bold 41px Arial";
+  ["Calls: (254) 900-7588","Text / WhatsApp: (254) 495-5082","Email: heartoftexastents@gmail.com","Web: www.heartoftexastents.com","Se habla español"].forEach((t,i)=>ctx.fillText(t,contactX,headerY+70+i*58));
+  y+=headerH;
   ctx.fillStyle=navy;ctx.fillRect(margin,y,contentW,62);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="bold 36px Arial";ctx.fillText("VISIT OUR WEBSITE: www.heartoftexastents.com  •  SE HABLA ESPAÑOL",W/2,y+40);y+=62;
   ctx.fillStyle="#f4f6f8";ctx.fillRect(margin,y,contentW,105);ctx.strokeStyle=border;ctx.strokeRect(margin,y,contentW,105);
   ctx.fillStyle=red;ctx.textAlign="left";ctx.font="bold 54px Arial";ctx.fillText("RENTAL QUOTE",margin+35,y+63);
