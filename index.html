@@ -54,6 +54,30 @@ input,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padd
  .pdfNotes{margin:9px 17px 0;border:1px solid #d9e0e8;border-left:4px solid #b8202a;border-radius:6px;padding:7px 9px}.pdfWebsiteBar{padding:7px 17px;text-align:center;background:#17264d;color:#fff;font-size:8.5pt;font-weight:800;letter-spacing:.35px}.pdfWebsiteBar span{color:#b8202a}
 .pdfFooter{margin-top:12px;padding:9px 17px 12px;background:#17264d;color:#fff;text-align:center;font-size:7.8pt;line-height:1.45}.pdfFooter b{color:#fff}
 }
+
+@media print {
+ body.printing #pdfQuote.pdf-large .pdfTitleBar h2{font-size:20px!important}
+ body.printing #pdfQuote.pdf-large .pdfValue{font-size:11pt!important}
+ body.printing #pdfQuote.pdf-large .pdfTable th{font-size:9.5pt!important;padding:8px!important}
+ body.printing #pdfQuote.pdf-large .pdfTable td{font-size:11pt!important;padding:9px 8px!important}
+ body.printing #pdfQuote.pdf-large .pdfTotalRow{font-size:10.5pt!important;padding:4px 0!important}
+ body.printing #pdfQuote.pdf-large .pdfGrand{font-size:15pt!important}
+ body.printing #pdfQuote.pdf-compact .pdfHead{padding:8px 10px 6px!important}
+ body.printing #pdfQuote.pdf-compact .pdfLogo{width:60px!important;height:48px!important}
+ body.printing #pdfQuote.pdf-compact .pdfInfo{gap:3px!important;padding:5px 10px 2px!important}
+ body.printing #pdfQuote.pdf-compact .pdfBox{padding:3px 5px!important;min-height:20px!important}
+ body.printing #pdfQuote.pdf-compact .pdfLabel{font-size:6pt!important}
+ body.printing #pdfQuote.pdf-compact .pdfValue{font-size:7.5pt!important}
+ body.printing #pdfQuote.pdf-compact .pdfItemsWrap{padding:2px 10px 0!important}
+ body.printing #pdfQuote.pdf-compact .pdfTable th{padding:3px!important;font-size:6.8pt!important}
+ body.printing #pdfQuote.pdf-compact .pdfTable td{padding:2px 3px!important;font-size:7.2pt!important}
+ body.printing #pdfQuote.pdf-compact .pdfTotalsArea{padding:3px 10px 0!important}
+ body.printing #pdfQuote.pdf-compact .pdfTotalRow{font-size:7.2pt!important;padding:1px 0!important}
+ body.printing #pdfQuote.pdf-compact .pdfGrand{font-size:10pt!important;padding:3px 0!important}
+ body.printing #pdfQuote.pdf-compact .pdfNotes{margin:4px 10px 0!important;padding:3px 5px!important}
+ body.printing #pdfQuote.pdf-compact .pdfFooter{margin-top:4px!important;padding:4px 8px!important;font-size:6pt!important}
+}
+
 </style>
 <style>
 @media print{
@@ -372,9 +396,13 @@ function buildPdfFromJpeg(jpeg,w,h){const enc=new TextEncoder();const parts=[];c
 function sharePdfFile(){ printQuote("quote"); }
 function escPdf(s){return escapeHtml(String(s||""))}
 function printQuote(mode="quote"){
+  if(!pdfRoot){alert("PDF area is missing. Please reload the app.");return;}
   try { saveCurrentQuote(mode==="invoice"?"COMPLETED":"QUOTE SENT"); } catch(e) {}
   document.body.classList.add("printing");
   const logo=document.querySelector(".logo")?.src||"";
+  const pdfItemCount=products.reduce((n,p,i)=>n+(Number(document.getElementById("q"+i)?.value||0)>0?1:0),0);
+  pdfRoot.classList.remove("pdf-large","pdf-compact","pdf-medium");
+  pdfRoot.classList.add(pdfItemCount<=3?"pdf-large":(pdfItemCount>=5?"pdf-compact":"pdf-medium"));
   const customer=document.getElementById("customer").value.trim();
   const phone=document.getElementById("phone").value.trim();
   const email=document.getElementById("email").value.trim();
@@ -446,7 +474,7 @@ async function saveQuoteImage(){
   ctx.fillStyle=navy;ctx.textAlign="right";ctx.font="bold 23px Arial";ctx.fillText("Quote #: "+document.getElementById("quoteNo").value,right-28,y+42);ctx.font="22px Arial";ctx.fillText("Created: "+dateText("created"),right-28,y+76);y+=140;
   // Automatically compact the image layout as the item count increases.
   const itemCount=products.reduce((n,p,i)=>n+(Number(document.getElementById("q"+i)?.value||0)>0?1:0),0);
-  const dense=itemCount>=7, veryDense=itemCount>=12;
+  const dense=itemCount>=4, veryDense=itemCount>=7;
   const cust=document.getElementById("customer").value.trim(),install=document.getElementById("installDate").value?dateText("installDate"):"",addr=document.getElementById("address").value.trim(),phone=document.getElementById("phone").value.trim(),email=document.getElementById("email").value.trim();
   ctx.fillStyle=gray;ctx.font="bold 20px Arial";ctx.textAlign="left";
   const info=[];if(cust)info.push(["CUSTOMER / COMPANY",cust]);if(install)info.push(["INSTALLATION DATE",install]);if(addr)info.push(["EVENT LOCATION",addr]);if(phone||email)info.push(["CUSTOMER CONTACT",[phone,email].filter(Boolean).join(" • ")]);
