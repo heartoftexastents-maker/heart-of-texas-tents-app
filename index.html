@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="htt-pdf-version" content="2026-10-20-image-export-readable-v4">
+<meta name="htt-pdf-version" content="2026-10-20-image-export-portrait-readable-v5">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -453,6 +453,10 @@ async function saveQuoteImage(){
   const canvas=document.createElement("canvas");canvas.width=W;canvas.height=H;
   const ctx=canvas.getContext("2d");
   ctx.fillStyle="#ffffff";ctx.fillRect(0,0,W,H);
+  // Keep the exported quote in portrait orientation for phone viewing and printing.
+  // Vertical spacing is expanded while contact details are enlarged for readability.
+  const imageYScale=1.4;
+  ctx.scale(1,imageYScale);
   const navy="#17264d",red="#b8202a",gray="#66758c",border="#d9e0e8";
   const margin=205,right=W-margin,contentW=right-margin;
   let y=125;
@@ -464,9 +468,9 @@ async function saveQuoteImage(){
   ctx.fillStyle=navy;ctx.textAlign="left";ctx.font="bold 66px Georgia";ctx.fillText("HEART OF TEXAS TENTS",margin+330,y+92);
   ctx.fillStyle=gray;ctx.font="bold 32px Arial";ctx.fillText("EVENT RENTALS • WACO, TEXAS & SURROUNDING AREAS",margin+330,y+150);
   ctx.fillStyle=red;ctx.font="bold 28px Arial";ctx.fillText("HIGH PEAK TENTS • EVENT LIGHTING • TABLES • CHAIRS • SIDE WALLS",margin+330,y+202);
-  ctx.fillStyle="#44546c";ctx.textAlign="right";ctx.font="35px Arial";
+  ctx.fillStyle="#44546c";ctx.textAlign="right";ctx.font="bold 44px Arial";
   const contactX=right-24;
-  ["Calls: (254) 900-7588","Text / WhatsApp: (254) 495-5082","Email: heartoftexastents@gmail.com","Web: www.heartoftexastents.com","Se habla español"].forEach((t,i)=>ctx.fillText(t,contactX,y+70+i*54));
+  ["Calls: (254) 900-7588","Text / WhatsApp: (254) 495-5082","Email: heartoftexastents@gmail.com","Web: www.heartoftexastents.com","Se habla español"].forEach((t,i)=>ctx.fillText(t,contactX,y+68+i*58));
   y+=370;
   ctx.fillStyle=navy;ctx.fillRect(margin,y,contentW,62);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="bold 36px Arial";ctx.fillText("VISIT OUR WEBSITE: www.heartoftexastents.com  •  SE HABLA ESPAÑOL",W/2,y+40);y+=62;
   ctx.fillStyle="#f4f6f8";ctx.fillRect(margin,y,contentW,105);ctx.strokeStyle=border;ctx.strokeRect(margin,y,contentW,105);
@@ -497,7 +501,7 @@ async function saveQuoteImage(){
   // Keep the footer directly after the quote content so the exported image has no huge blank gap.
   const fy=y+45;ctx.fillStyle=navy;ctx.fillRect(margin,fy,contentW,300);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="37px Arial";ctx.fillText("Thank you for choosing Heart of Texas Tents • Waco, TX & surrounding areas",W/2,fy+65);ctx.fillText("High Peak Tents • Event Lighting • Tables • Chairs • Side Walls",W/2,fy+110);ctx.fillText("(254) 900-7588 • Text/WhatsApp: (254) 495-5082",W/2,fy+155);ctx.fillText("heartoftexastents@gmail.com",W/2,fy+200);ctx.font="bold 38px Arial";ctx.fillText("WEBSITE: www.heartoftexastents.com • SE HABLA ESPAÑOL",W/2,fy+245);
   // Crop the exported PNG to the actual quote plus footer; do not include unused page space.
-  const exportHeight=Math.min(H,fy+360);
+  const exportHeight=Math.min(H,Math.ceil((fy+360)*imageYScale));
   const exportCanvas=document.createElement("canvas");exportCanvas.width=W;exportCanvas.height=exportHeight;
   exportCanvas.getContext("2d").drawImage(canvas,0,0,W,exportHeight,0,0,W,exportHeight);
   exportCanvas.toBlob(async blob=>{if(!blob){alert("Could not create the image. Please try again.");return}const filename="Heart_of_Texas_Tents_Quote_"+document.getElementById("quoteNo").value+".png";const file=new File([blob],filename,{type:"image/png"});try{if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({files:[file],title:"Heart of Texas Tents Quote",text:"Save this quote image to Photos to print."});}else{const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);alert("Quote image created. Open the downloaded image and save it to Photos to print.")}}catch(e){if(e.name!=="AbortError"){const url=URL.createObjectURL(blob);window.open(url,"_blank");alert("The image is ready. Use Share, then Save Image to add it to Photos.")}}},"image/png");
