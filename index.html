@@ -373,7 +373,7 @@ function syncPaidButton(){const b=document.getElementById("markPaidBtn");if(!b)r
 function choosePaymentMethod(defaultMethod="Square"){
  return new Promise(resolve=>{
   const existing=document.getElementById("paymentMethodDialog");if(existing)existing.remove();
-  const options=["Square","Cash","Zelle","Check","Bank Transfer","Other"];
+  const options=["Square","Cash","Zelle","Venmo","Cash App","Check","Bank Transfer","Other"];
   const overlay=document.createElement("div");overlay.id="paymentMethodDialog";
   overlay.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;";
   const panel=document.createElement("div");panel.style.cssText="background:#fff;color:#17264d;width:100%;max-width:420px;border-radius:20px;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25);font-family:Arial,sans-serif;max-height:85vh;overflow:auto;";
